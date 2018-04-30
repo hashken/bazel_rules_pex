@@ -544,8 +544,8 @@ def pex_repositories():
 
   native.http_file(
       name = "pex_src",
-      url = "https://pypi.python.org/packages/8e/c8/b5b41173eb11e4d0f56956aaa3df1e721b48983e7ebc77a8a4d48bd586d0/pex-1.3.1.tar.gz",
-      sha256 = "5288255f10cc2bc569de6b090971ca190676417c33aedde2138f195b31b990f0",
+      url = "https://files.pythonhosted.org/packages/fa/8e/1e3e547906487d1feb83f717565497cc5965051d4c204734dce7b55eb71a/pex-1.4.0.tar.gz",
+      sha256 = "cc882fafdd47818fa9973232f5ba0250827cecc676a92d8271256403cd5470f8",
   )
 
   native.http_file(
@@ -580,9 +580,9 @@ def pex_repositories():
 
   native.new_http_archive(
       name = "virtualenv",
-      url = "https://pypi.python.org/packages/d4/0c/9840c08189e030873387a73b90ada981885010dd9aea134d6de30cd24cb8/virtualenv-15.1.0.tar.gz",
-      sha256 = "02f8102c2436bb03b3ee6dede1919d1dac8a427541652e5ec95171ec8adbc93a",
-      strip_prefix = "virtualenv-15.1.0",
+      url = "https://files.pythonhosted.org/packages/33/bc/fa0b5347139cd9564f0d44ebd2b147ac97c36b2403943dbee8a25fd74012/virtualenv-16.0.0.tar.gz",
+      sha256 = "ca07b4c0b54e14a91af9f34d0919790b016923d157afda5efdde55c96718f752",
+      strip_prefix = "virtualenv-16.0.0",
       build_file_content = "\n".join([
           "py_binary(",
           "    name = 'virtualenv',",

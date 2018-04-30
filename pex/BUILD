@@ -35,6 +35,11 @@ genrule(
         $(location @virtualenv//:virtualenv) --no-download --quiet --clear "$$VENV"
         PYTHON="$$VENV/bin/python"
 
+        # Downgrade wheel version due to pex constraint
+        $$PYTHON $$VENV/bin/pip install wheel==0.29.0 \
+            --quiet --no-cache-dir --no-index \
+            --find-links $$(dirname $(location @wheel_src//file))
+
         $$PYTHON $$VENV/bin/pip install pex \
             --quiet --no-cache-dir --no-index --build $(@D)/pexbuild \
             --find-links $$(dirname $(location @pex_src//file)) \
