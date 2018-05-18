@@ -14,6 +14,12 @@ genrule(
         "@requests_src//file",
         "@pyopenssl//file",
         "@cryptography//file",
+        "@cffi//file",
+        "@asn1crypto//file",
+        "@enum34//file",
+        "@six//file",
+        "@ipaddress//file",
+        "@pycparser//file",
         "@urllib3_whl//file",
         "@idna_whl//file",
         "@certifi_whl//file",
@@ -59,6 +65,12 @@ genrule(
             --find-links $$(dirname $(location @requests_src//file)) \
             --find-links $$(dirname $(location @pyopenssl//file)) \
             --find-links $$(dirname $(location @cryptography//file)) \
+            --find-links $$(dirname $(location @cffi//file)) \
+            --find-links $$(dirname $(location @asn1crypto//file)) \
+            --find-links $$(dirname $(location @enum34//file)) \
+            --find-links $$(dirname $(location @six//file)) \
+            --find-links $$(dirname $(location @ipaddress//file)) \
+            --find-links $$(dirname $(location @pycparser//file)) \
             --find-links $$(dirname $(location @idna_whl//file)) \
             --find-links $$(dirname $(location @urllib3_whl//file)) \
             --find-links $$(dirname $(location @certifi_whl//file)) \

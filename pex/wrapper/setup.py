@@ -12,7 +12,7 @@ setuptools.setup(
     install_requires=[
         "pex",
         "wheel",
-        # Not strictly required, but requests makes SSL more likely to work
-        "requests",
+        # Not strictly required, but requests[security] makes SSL more likely to work
+        "requests[security]",
     ],
 )
