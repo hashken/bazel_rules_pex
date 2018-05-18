@@ -12,6 +12,8 @@ genrule(
         "@wheel_src//file",
         "@pex_src//file",
         "@requests_src//file",
+        "@pyopenssl//file",
+        "@cryptography//file",
         "@urllib3_whl//file",
         "@idna_whl//file",
         "@certifi_whl//file",
@@ -55,6 +57,8 @@ genrule(
             --find-links $$(dirname $(location @pex_src//file)) \
             --find-links $$(dirname $(location @setuptools_whl//file)) \
             --find-links $$(dirname $(location @requests_src//file)) \
+            --find-links $$(dirname $(location @pyopenssl//file)) \
+            --find-links $$(dirname $(location @cryptography//file)) \
             --find-links $$(dirname $(location @idna_whl//file)) \
             --find-links $$(dirname $(location @urllib3_whl//file)) \
             --find-links $$(dirname $(location @certifi_whl//file)) \
