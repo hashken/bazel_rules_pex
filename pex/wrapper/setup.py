@@ -14,5 +14,7 @@ setuptools.setup(
         "wheel",
         # Not strictly required, but requests[security] makes SSL more likely to work
         "requests[security]",
+        "ndg-httpsclient",
+        "pyasn1",
     ],
 )

@@ -13,6 +13,8 @@ genrule(
         "@pex_src//file",
         "@requests_src//file",
         "@pyopenssl//file",
+        "@ndg_httpsclient//file",
+        "@pyasn1//file",
         "@cryptography//file",
         "@cffi//file",
         "@asn1crypto//file",
@@ -64,6 +66,8 @@ genrule(
             --find-links $$(dirname $(location @setuptools_whl//file)) \
             --find-links $$(dirname $(location @requests_src//file)) \
             --find-links $$(dirname $(location @pyopenssl//file)) \
+            --find-links $$(dirname $(location @ndg_httpsclient//file)) \
+            --find-links $$(dirname $(location @pyasn1//file)) \
             --find-links $$(dirname $(location @cryptography//file)) \
             --find-links $$(dirname $(location @cffi//file)) \
             --find-links $$(dirname $(location @asn1crypto//file)) \

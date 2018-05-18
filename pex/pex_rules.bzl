@@ -579,6 +579,18 @@ def pex_repositories():
   )
 
   native.http_file(
+      name = "ndg_httpsclient",
+      url = "https://files.pythonhosted.org/packages/30/52/332f10939d263ea5047a1bbe8418cb5dc3dab1d1e99df35c93b2a852061c/ndg_httpsclient-0.5.0.tar.gz",
+      sha256 = "c009f5430790936b3a97eaf9f968516664d97e146ab2bda991f0caadb7cc088b",
+  )
+
+  native.http_file(
+      name = "pyasn1",
+      url = "https://files.pythonhosted.org/packages/eb/3d/b7d0fdf4a882e26674c68c20f40682491377c4db1439870f5b6f862f76ed/pyasn1-0.4.2.tar.gz",
+      sha256 = "d258b0a71994f7770599835249cece1caef3c70def868c4915e6e5ca49b67d15",
+  )
+
+  native.http_file(
       name = "cryptography",
       url = "https://files.pythonhosted.org/packages/ec/b2/faa78c1ab928d2b2c634c8b41ff1181f0abdd9adf9193211bd606ffa57e2/cryptography-2.2.2.tar.gz",
       sha256 = "9fc295bf69130a342e7a19a39d7bbeb15c0bcaabc7382ec33ef3b2b7d18d2f63",
