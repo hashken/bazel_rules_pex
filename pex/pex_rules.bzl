@@ -74,7 +74,8 @@ repo_file_types = FileType([
 def _collect_transitive_sources(ctx):
   source_files = depset(order="postorder")
   for dep in ctx.attr.deps:
-    source_files += dep.py.transitive_sources
+    if hasattr(dep, "py"):
+      source_files += dep.py.transitive_sources
   source_files += pex_file_types.filter(ctx.files.srcs)
   return source_files
 
@@ -82,7 +83,7 @@ def _collect_transitive_sources(ctx):
 def _collect_transitive_eggs(ctx):
   transitive_eggs = depset(order="postorder")
   for dep in ctx.attr.deps:
-    if hasattr(dep.py, "transitive_eggs"):
+    if hasattr(dep, "py") and hasattr(dep.py, "transitive_eggs"):
       transitive_eggs += dep.py.transitive_eggs
   transitive_eggs += egg_file_types.filter(ctx.files.eggs)
   return transitive_eggs
@@ -91,7 +92,7 @@ def _collect_transitive_eggs(ctx):
 def _collect_transitive_reqs(ctx):
   transitive_reqs = depset(order="postorder")
   for dep in ctx.attr.deps:
-    if hasattr(dep.py, "transitive_reqs"):
+    if hasattr(dep, "py") and hasattr(dep.py, "transitive_reqs"):
       transitive_reqs += dep.py.transitive_reqs
   transitive_reqs += ctx.attr.reqs
   return transitive_reqs
@@ -100,7 +101,7 @@ def _collect_transitive_reqs(ctx):
 def _collect_repos(ctx):
   repos = {}
   for dep in ctx.attr.deps:
-    if hasattr(dep.py, "repos"):
+    if hasattr(dep, "py") and hasattr(dep.py, "repos"):
       repos += dep.py.repos
   for file in repo_file_types.filter(ctx.files.repos):
     repos.update({file.dirname : True})
@@ -321,8 +322,7 @@ def _pex_pytest_impl(ctx):
 pex_attrs = {
     "srcs": attr.label_list(flags = ["DIRECT_COMPILE_TIME_INPUT"],
                             allow_files = pex_file_types),
-    "deps": attr.label_list(allow_files = False,
-                            providers = ["py"]),
+    "deps": attr.label_list(allow_files = False),
     "eggs": attr.label_list(flags = ["DIRECT_COMPILE_TIME_INPUT"],
                             allow_files = egg_file_types),
     "reqs": attr.string_list(),
@@ -432,7 +432,7 @@ Args:
     It is an error to specify both main and entrypoint.
 
   script: Set the entrypoint to the script or console_script as defined by any of the distributions in the pex.
-    
+
     For example: "pex --script fab fabric" or "pex --script mturk boto"
 
   interpreter: Path to the python interpreter the pex should to use in its shebang line.
