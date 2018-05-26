@@ -168,11 +168,15 @@ def _pex_binary_impl(ctx):
 
   if ctx.attr.entrypoint and ctx.file.main:
     fail("Please specify either entrypoint or main, not both.")
+
+  main_file = None
+  main_pkg = None
   if ctx.attr.entrypoint:
-    main_file = None
     main_pkg = ctx.attr.entrypoint
   elif ctx.file.main:
     main_file = ctx.file.main
+  elif ctx.attr.script:
+    script = ctx.attr.script
   else:
     main_file = pex_file_types.filter(ctx.files.srcs)[0]
   if main_file:
@@ -218,9 +222,12 @@ def _pex_binary_impl(ctx):
     arguments += ["--repo", repo]
   for egg in py.transitive_eggs:
     arguments += ["--find-links", egg.dirname]
+  if main_pkg:
+    arguments += ["--entry-point", main_pkg]
+  elif script:
+    arguments += ["--script", script]
   arguments += [
       "--pex-root", ".pex",  # May be redundant since we also set PEX_ROOT
-      "--entry-point", main_pkg,
       "--output-file", deploy_pex.path,
       "--cache-dir", ".pex/build",
       manifest_file.path,
@@ -353,6 +360,7 @@ pex_bin_attrs = _dmerge(pex_attrs, {
     "main": attr.label(allow_files = True,
                        single_file = True),
     "entrypoint": attr.string(),
+    "script": attr.string(),
     "interpreter": attr.string(),
     "pex_use_wheels": attr.bool(default=True),
     "pex_verbosity": attr.int(default=0),
@@ -422,6 +430,10 @@ Args:
 
     If unspecified, the `main` attribute will be used.
     It is an error to specify both main and entrypoint.
+
+  script: Set the entrypoint to the script or console_script as defined by any of the distributions in the pex.
+    
+    For example: "pex --script fab fabric" or "pex --script mturk boto"
 
   interpreter: Path to the python interpreter the pex should to use in its shebang line.
 """
