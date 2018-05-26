@@ -56,7 +56,7 @@ so that Bazel can find your `prelude_bazel` file.
 ## pex_pytest
 
 <pre>
-pex_pytest(<a href="#pex_pytest.name">name</a>, <a href="#pex_pytest.srcs">srcs</a>, <a href="#pex_pytest.deps">deps</a>, <a href="#pex_pytest.eggs">eggs</a>, <a href="#pex_pytest.data">data</a>, <a href="#pex_pytest.args">args</a>, <a href="#pex_pytest.flaky">flaky</a>, <a href="#pex_pytest.local">local</a>, <a href="#pex_pytest.size">size</a>, <a href="#pex_pytest.timeout">timeout</a>, <a href="#pex_pytest.tags">tags</a>)
+pex_pytest(<a href="#pex_pytest.name">name</a>, <a href="#pex_pytest.srcs">srcs</a>, <a href="#pex_pytest.deps">deps</a>, <a href="#pex_pytest.eggs">eggs</a>, <a href="#pex_pytest.data">data</a>, <a href="#pex_pytest.args">args</a>, <a href="#pex_pytest.flaky">flaky</a>, <a href="#pex_pytest.licenses">licenses</a>, <a href="#pex_pytest.local">local</a>, <a href="#pex_pytest.size">size</a>, <a href="#pex_pytest.timeout">timeout</a>, <a href="#pex_pytest.tags">tags</a>)
 </pre>
 
 A variant of pex_test that uses py.test to run one or more sets of tests.
@@ -129,6 +129,12 @@ Exceptions are `main` and `entrypoint`, which cannot be used with this macro.
         <p><code>Unknown; Optional</code></p>
       </td>
     </tr>
+    <tr id="pex_pytest.licenses">
+      <td><code>licenses</code></td>
+      <td>
+        <p><code>List of strings; Optional</code></p>
+      </td>
+    </tr>
     <tr id="pex_pytest.local">
       <td><code>local</code></td>
       <td>
@@ -156,6 +162,7 @@ Exceptions are `main` and `entrypoint`, which cannot be used with this macro.
   </tbody>
 </table>
 <a name="pex_repositories"></a>
+
 ## pex_repositories
 
 <pre>
@@ -168,7 +175,7 @@ Rules to be invoked from WORKSPACE for remote dependencies.
 ## pex_binary
 
 <pre>
-pex_binary(<a href="#pex_binary.name">name</a>, <a href="#pex_binary.deps">deps</a>, <a href="#pex_binary.data">data</a>, <a href="#pex_binary.srcs">srcs</a>, <a href="#pex_binary.disable_cache">disable_cache</a>, <a href="#pex_binary.eggs">eggs</a>, <a href="#pex_binary.entrypoint">entrypoint</a>, <a href="#pex_binary.interpreter">interpreter</a>, <a href="#pex_binary.main">main</a>, <a href="#pex_binary.no_index">no_index</a>, <a href="#pex_binary.pex_use_wheels">pex_use_wheels</a>, <a href="#pex_binary.pex_verbosity">pex_verbosity</a>, <a href="#pex_binary.repos">repos</a>, <a href="#pex_binary.req_files">req_files</a>, <a href="#pex_binary.reqs">reqs</a>, <a href="#pex_binary.zip_safe">zip_safe</a>)
+pex_binary(<a href="#pex_binary.name">name</a>, <a href="#pex_binary.deps">deps</a>, <a href="#pex_binary.data">data</a>, <a href="#pex_binary.srcs">srcs</a>, <a href="#pex_binary.disable_cache">disable_cache</a>, <a href="#pex_binary.eggs">eggs</a>, <a href="#pex_binary.entrypoint">entrypoint</a>, <a href="#pex_binary.interpreter">interpreter</a>, <a href="#pex_binary.licenses">licenses</a>, <a href="#pex_binary.main">main</a>, <a href="#pex_binary.no_index">no_index</a>, <a href="#pex_binary.pex_use_wheels">pex_use_wheels</a>, <a href="#pex_binary.pex_verbosity">pex_verbosity</a>, <a href="#pex_binary.repos">repos</a>, <a href="#pex_binary.req_files">req_files</a>, <a href="#pex_binary.reqs">reqs</a>, <a href="#pex_binary.script">script</a>, <a href="#pex_binary.zip_safe">zip_safe</a>)
 </pre>
 
 Build a deployable pex executable.
@@ -246,6 +253,12 @@ It is an error to specify both main and entrypoint.</p>
         <p>Path to the python interpreter the pex should to use in its shebang line.</p>
       </td>
     </tr>
+    <tr id="pex_binary.licenses">
+      <td><code>licenses</code></td>
+      <td>
+        <p><code>License; Optional</code></p>
+      </td>
+    </tr>
     <tr id="pex_binary.main">
       <td><code>main</code></td>
       <td>
@@ -300,6 +313,14 @@ the transitive python dependencies and fetch them from pypi.</p>
 <p>It is recommended that you use <code>eggs</code> instead where possible.</p>
       </td>
     </tr>
+    <tr id="pex_binary.script">
+      <td><code>script</code></td>
+      <td>
+        <p><code>String; Optional; Default is ''</code></p>
+        <p>Set the entrypoint to the script or console_script as defined by any of the distributions in the pex.</p>
+<p>For example: "pex --script fab fabric" or "pex --script mturk boto"</p>
+      </td>
+    </tr>
     <tr id="pex_binary.zip_safe">
       <td><code>zip_safe</code></td>
       <td>
@@ -309,10 +330,11 @@ the transitive python dependencies and fetch them from pypi.</p>
   </tbody>
 </table>
 <a name="pex_library"></a>
+
 ## pex_library
 
 <pre>
-pex_library(<a href="#pex_library.name">name</a>, <a href="#pex_library.deps">deps</a>, <a href="#pex_library.data">data</a>, <a href="#pex_library.srcs">srcs</a>, <a href="#pex_library.disable_cache">disable_cache</a>, <a href="#pex_library.eggs">eggs</a>, <a href="#pex_library.no_index">no_index</a>, <a href="#pex_library.repos">repos</a>, <a href="#pex_library.req_files">req_files</a>, <a href="#pex_library.reqs">reqs</a>)
+pex_library(<a href="#pex_library.name">name</a>, <a href="#pex_library.deps">deps</a>, <a href="#pex_library.data">data</a>, <a href="#pex_library.srcs">srcs</a>, <a href="#pex_library.disable_cache">disable_cache</a>, <a href="#pex_library.eggs">eggs</a>, <a href="#pex_library.licenses">licenses</a>, <a href="#pex_library.no_index">no_index</a>, <a href="#pex_library.repos">repos</a>, <a href="#pex_library.req_files">req_files</a>, <a href="#pex_library.reqs">reqs</a>)
 </pre>
 
 
@@ -373,6 +395,12 @@ will be relative to the workspace root.</p>
         <p><code>.egg</code> and <code>.whl</code> files to include as python packages.</p>
       </td>
     </tr>
+    <tr id="pex_library.licenses">
+      <td><code>licenses</code></td>
+      <td>
+        <p><code>License; Optional</code></p>
+      </td>
+    </tr>
     <tr id="pex_library.no_index">
       <td><code>no_index</code></td>
       <td>
@@ -410,10 +438,11 @@ the transitive python dependencies and fetch them from pypi.</p>
   </tbody>
 </table>
 <a name="pex_test"></a>
+
 ## pex_test
 
 <pre>
-pex_test(<a href="#pex_test.name">name</a>, <a href="#pex_test.deps">deps</a>, <a href="#pex_test.data">data</a>, <a href="#pex_test.srcs">srcs</a>, <a href="#pex_test.disable_cache">disable_cache</a>, <a href="#pex_test.eggs">eggs</a>, <a href="#pex_test.entrypoint">entrypoint</a>, <a href="#pex_test.interpreter">interpreter</a>, <a href="#pex_test.main">main</a>, <a href="#pex_test.no_index">no_index</a>, <a href="#pex_test.pex_use_wheels">pex_use_wheels</a>, <a href="#pex_test.pex_verbosity">pex_verbosity</a>, <a href="#pex_test.repos">repos</a>, <a href="#pex_test.req_files">req_files</a>, <a href="#pex_test.reqs">reqs</a>, <a href="#pex_test.zip_safe">zip_safe</a>)
+pex_test(<a href="#pex_test.name">name</a>, <a href="#pex_test.deps">deps</a>, <a href="#pex_test.data">data</a>, <a href="#pex_test.srcs">srcs</a>, <a href="#pex_test.disable_cache">disable_cache</a>, <a href="#pex_test.eggs">eggs</a>, <a href="#pex_test.entrypoint">entrypoint</a>, <a href="#pex_test.interpreter">interpreter</a>, <a href="#pex_test.licenses">licenses</a>, <a href="#pex_test.main">main</a>, <a href="#pex_test.no_index">no_index</a>, <a href="#pex_test.pex_use_wheels">pex_use_wheels</a>, <a href="#pex_test.pex_verbosity">pex_verbosity</a>, <a href="#pex_test.repos">repos</a>, <a href="#pex_test.req_files">req_files</a>, <a href="#pex_test.reqs">reqs</a>, <a href="#pex_test.script">script</a>, <a href="#pex_test.zip_safe">zip_safe</a>)
 </pre>
 
 
@@ -491,6 +520,12 @@ It is an error to specify both main and entrypoint.</p>
         <p>Path to the python interpreter the pex should to use in its shebang line.</p>
       </td>
     </tr>
+    <tr id="pex_test.licenses">
+      <td><code>licenses</code></td>
+      <td>
+        <p><code>License; Optional</code></p>
+      </td>
+    </tr>
     <tr id="pex_test.main">
       <td><code>main</code></td>
       <td>
@@ -543,6 +578,14 @@ the transitive python dependencies and fetch them from pypi.</p>
 <p>This feature will reduce build determinism!  It tells pex to resolve all
 the transitive python dependencies and fetch them from pypi.</p>
 <p>It is recommended that you use <code>eggs</code> instead where possible.</p>
+      </td>
+    </tr>
+    <tr id="pex_test.script">
+      <td><code>script</code></td>
+      <td>
+        <p><code>String; Optional; Default is ''</code></p>
+        <p>Set the entrypoint to the script or console_script as defined by any of the distributions in the pex.</p>
+<p>For example: "pex --script fab fabric" or "pex --script mturk boto"</p>
       </td>
     </tr>
     <tr id="pex_test.zip_safe">
