@@ -172,14 +172,16 @@ def _pex_binary_impl(ctx):
 
   main_file = None
   main_pkg = None
+  script = None
   if ctx.attr.entrypoint:
     main_pkg = ctx.attr.entrypoint
   elif ctx.file.main:
     main_file = ctx.file.main
   elif ctx.attr.script:
     script = ctx.attr.script
-  else:
+  elif ctx.files.srcs:
     main_file = pex_file_types.filter(ctx.files.srcs)[0]
+
   if main_file:
     # Translate main_file's short path into a python module name
     main_pkg = main_file.short_path.replace('/', '.')[:-3]
