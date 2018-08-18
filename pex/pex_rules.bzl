@@ -424,18 +424,22 @@ Args:
 
   main: File to use as the entrypoint.
 
-    If unspecified, the first file from the `srcs` attribute will be used.
+    If unspecified, `script` or first file from the `srcs` attribute will be used.
+    It is an error to specify `entrypoint`, `main`, and `script` together.
 
   entrypoint: Name of a python module to use as the entrypoint.
 
     e.g. `your.project.main`
 
-    If unspecified, the `main` attribute will be used.
-    It is an error to specify both main and entrypoint.
+    If unspecified, the `main`, `script`, or first file from the `srcs` attribute will be used.
+    It is an error to specify `entrypoint`, `main`, and `script` together.
 
   script: Set the entrypoint to the script or console_script as defined by any of the distributions in the pex.
 
     For example: "pex --script fab fabric" or "pex --script mturk boto"
+    
+    If unspecified, the first file from the `srcs` attribute will be used.
+    It is an error to specify `entrypoint`, `main`, and `script` together.
 
   interpreter: Path to the python interpreter the pex should to use in its shebang line.
 """
