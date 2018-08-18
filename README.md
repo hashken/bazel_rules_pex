@@ -161,8 +161,8 @@ Exceptions are `main` and `entrypoint`, which cannot be used with this macro.
     </tr>
   </tbody>
 </table>
-<a name="pex_repositories"></a>
 
+<a name="pex_repositories"></a>
 ## pex_repositories
 
 <pre>
@@ -242,8 +242,8 @@ will be relative to the workspace root.</p>
         <p><code>String; Optional; Default is ''</code></p>
         <p>Name of a python module to use as the entrypoint.</p>
 <p>e.g. <code>your.project.main</code></p>
-<p>If unspecified, the <code>main</code> attribute will be used.
-It is an error to specify both main and entrypoint.</p>
+<p>If unspecified, the <code>main</code>, <code>script</code>, or first file from the <code>srcs</code> attribute will be used.
+It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>script</code> together.</p>
       </td>
     </tr>
     <tr id="pex_binary.interpreter">
@@ -264,7 +264,8 @@ It is an error to specify both main and entrypoint.</p>
       <td>
         <p><code><a href="https://bazel.build/docs/build-ref.html#labels">Label</a>; Optional</code></p>
         <p>File to use as the entrypoint.</p>
-<p>If unspecified, the first file from the <code>srcs</code> attribute will be used.</p>
+<p>If unspecified, <code>script</code> or first file from the <code>srcs</code> attribute will be used.
+It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>script</code> together.</p>
       </td>
     </tr>
     <tr id="pex_binary.no_index">
@@ -319,6 +320,8 @@ the transitive python dependencies and fetch them from pypi.</p>
         <p><code>String; Optional; Default is ''</code></p>
         <p>Set the entrypoint to the script or console_script as defined by any of the distributions in the pex.</p>
 <p>For example: "pex --script fab fabric" or "pex --script mturk boto"</p>
+<p>If unspecified, the first file from the <code>srcs</code> attribute will be used.
+It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>script</code> together.</p>
       </td>
     </tr>
     <tr id="pex_binary.zip_safe">
@@ -329,8 +332,8 @@ the transitive python dependencies and fetch them from pypi.</p>
     </tr>
   </tbody>
 </table>
-<a name="pex_library"></a>
 
+<a name="pex_library"></a>
 ## pex_library
 
 <pre>
@@ -437,8 +440,8 @@ the transitive python dependencies and fetch them from pypi.</p>
     </tr>
   </tbody>
 </table>
-<a name="pex_test"></a>
 
+<a name="pex_test"></a>
 ## pex_test
 
 <pre>
@@ -509,8 +512,8 @@ will be relative to the workspace root.</p>
         <p><code>String; Optional; Default is ''</code></p>
         <p>Name of a python module to use as the entrypoint.</p>
 <p>e.g. <code>your.project.main</code></p>
-<p>If unspecified, the <code>main</code> attribute will be used.
-It is an error to specify both main and entrypoint.</p>
+<p>If unspecified, the <code>main</code>, <code>script</code>, or first file from the <code>srcs</code> attribute will be used.
+It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>script</code> together.</p>
       </td>
     </tr>
     <tr id="pex_test.interpreter">
@@ -531,7 +534,8 @@ It is an error to specify both main and entrypoint.</p>
       <td>
         <p><code><a href="https://bazel.build/docs/build-ref.html#labels">Label</a>; Optional</code></p>
         <p>File to use as the entrypoint.</p>
-<p>If unspecified, the first file from the <code>srcs</code> attribute will be used.</p>
+<p>If unspecified, <code>script</code> or first file from the <code>srcs</code> attribute will be used.
+It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>script</code> together.</p>
       </td>
     </tr>
     <tr id="pex_test.no_index">
@@ -586,6 +590,8 @@ the transitive python dependencies and fetch them from pypi.</p>
         <p><code>String; Optional; Default is ''</code></p>
         <p>Set the entrypoint to the script or console_script as defined by any of the distributions in the pex.</p>
 <p>For example: "pex --script fab fabric" or "pex --script mturk boto"</p>
+<p>If unspecified, the first file from the <code>srcs</code> attribute will be used.
+It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>script</code> together.</p>
       </td>
     </tr>
     <tr id="pex_test.zip_safe">
