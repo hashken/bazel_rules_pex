@@ -574,8 +574,8 @@ def pex_repositories():
 
   native.http_file(
       name = "urllib3_whl",
-      url = "https://pypi.python.org/packages/63/cb/6965947c13a94236f6d4b8223e21beb4d576dc72e8130bd7880f600839b8/urllib3-1.22-py2.py3-none-any.whl",
-      sha256 = "06330f386d6e4b195fbfc736b297f58c5a892e4440e54d294d7004e3a9bbea1b",
+      url = "https://files.pythonhosted.org/packages/bd/c9/6fdd990019071a4a32a5e7cb78a1d92c53851ef4f56f62a3486e6a7d8ffb/urllib3-1.23-py2.py3-none-any.whl",
+      sha256 = "b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5",
   )
 
   native.http_file(
