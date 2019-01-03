@@ -195,8 +195,9 @@ def _pex_binary_impl(ctx):
 
   for dep in ctx.attr.deps:
     transitive_files += dep.default_runfiles.files
+
   runfiles = ctx.runfiles(
-      collect_default = True,
+      collect_default = False,
       transitive_files = transitive_files,
   )
 
@@ -224,7 +225,9 @@ def _pex_binary_impl(ctx):
   for repo in repos:
     arguments += ["--repo", repo]
   for egg in py.transitive_eggs:
-    arguments += ["--find-links", egg.dirname]
+    arguments += [egg.path]
+  for req in py.transitive_reqs:
+    arguments += [req]
   if main_pkg:
     arguments += ["--entry-point", main_pkg]
   elif script:
@@ -233,19 +236,23 @@ def _pex_binary_impl(ctx):
       "--pex-root", ".pex",  # May be redundant since we also set PEX_ROOT
       "--output-file", deploy_pex.path,
       "--cache-dir", ".pex/build",
-      manifest_file.path,
+      #manifest_file.path,
   ]
+  arguments += ['--resources-directory', '.']
 
   # form the inputs to pex builder
   _inputs = (
-      [manifest_file] +
-      list(runfiles.files) +
-      list(py.transitive_eggs)
+      #[manifest_file] +
+      list(runfiles.files)
+      #list(py.transitive_eggs)
   )
+
+  print(arguments)
+  print(ctx.files.srcs)
 
   ctx.action(
       mnemonic = "PexPython",
-      inputs = _inputs,
+      inputs = ctx.files.srcs,
       outputs = [deploy_pex],
       executable = pexbuilder,
       execution_requirements = {
@@ -343,7 +350,8 @@ pex_attrs = {
 
     # Used by pex_binary and pex_*test, not pex_library:
     "_pexbuilder": attr.label(
-        default = Label("//pex:pex_wrapper"),
+        #default = Label("//pex:pex_wrapper"),
+        default = Label("@pex_bin//file"),
         executable = True,
         cfg = "host",
     ),
@@ -564,6 +572,13 @@ def pex_repositories():
       name = "pex_src",
       url = "https://files.pythonhosted.org/packages/30/8f/74601d353042bc0ad0118be809f79a9a41243f0e599c20b77d79f7895753/pex-1.4.8.tar.gz",
       sha256 = "4c6d906daea8a729c010857a199ad21b4a2cb29f84783a7eb91b1597c35a4072",
+  )
+
+  native.http_file(
+      name = "pex_bin",
+      executable = True,
+      url = "https://github.com/pantsbuild/pex/releases/download/v1.4.5/pex27",
+      sha256 = "d2133eab6bca0a865db0b65d2bbb58071330059ae5c4e0cc80c1b7645e614c90"
   )
 
   native.http_file(
