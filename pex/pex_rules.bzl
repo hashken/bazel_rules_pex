@@ -243,16 +243,17 @@ def _pex_binary_impl(ctx):
   # form the inputs to pex builder
   _inputs = (
       #[manifest_file] +
-      list(runfiles.files)
-      #list(py.transitive_eggs)
+      list(runfiles.files) +
+      list(py.transitive_eggs)
   )
 
   print(arguments)
+  print(' '.join(arguments))
   print(ctx.files.srcs)
 
   ctx.action(
       mnemonic = "PexPython",
-      inputs = ctx.files.srcs,
+      inputs = _inputs,
       outputs = [deploy_pex],
       executable = pexbuilder,
       execution_requirements = {
