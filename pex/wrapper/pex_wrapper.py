@@ -65,6 +65,8 @@ def main():
 
     if poptions.cache_dir:
         poptions.cache_dir = pexbin.make_relative_to_root(poptions.cache_dir)
+    poptions.interpreter_cache_dir = pexbin.make_relative_to_root(
+        poptions.interpreter_cache_dir)
 
     reqs = manifest.get('requirements', [])
 
@@ -109,7 +111,7 @@ def main():
         # TODO(mikekap): Do something about manifest['nativeLibraries'].
 
         pexbin.log('Saving PEX file to %s' % poptions.pex_name,
-                   V=poptions.verbosity)
+                   v=poptions.verbosity)
         tmp_name = poptions.pex_name + '~'
         safe_delete(tmp_name)
         pex_builder.build(tmp_name)
