@@ -160,10 +160,22 @@ def _pex_binary_impl(ctx):
         transitive_files = transitive_files,
     )
 
+    resources_dir = ctx.actions.declare_directory("resources")
+    ctx.actions.run_shell(
+        mnemonic = "CreateResourceDirectory",
+        outputs = [resources_dir],
+        inputs = transitive_files.to_list(),
+        command = "mkdir -p {resources_dir} && rsync -R {transitive_files} {resources_dir}".format(
+            resources_dir = resources_dir.path,
+            transitive_files = " ".join([file.path for file in transitive_files]),
+        ),
+    )
+
     pexbuilder = ctx.executable._pexbuilder
+    arguments = []
 
     # form the arguments to pex builder
-    arguments = [] if ctx.attr.zip_safe else ["--not-zip-safe"]
+    arguments += [] if ctx.attr.zip_safe else ["--not-zip-safe"]
     arguments += [] if ctx.attr.pex_use_wheels else ["--no-use-wheel"]
     if ctx.attr.no_index:
         arguments += ["--no-index"]
@@ -191,19 +203,14 @@ def _pex_binary_impl(ctx):
     ]
     arguments += [
         "--resources-directory",
-        "{bin_dir}/{build_file_dir}/{rule_name}.runfiles/{workspace_name}/".format(
-            bin_dir = ctx.configuration.bin_dir.path,
-            build_file_dir = ctx.build_file_path.rstrip("/BUILD"),
-            rule_name = ctx.attr.name,
-            workspace_name = ctx.workspace_name,
-        ),
+        resources_dir.path,
     ]
 
     # form the inputs to pex builder
     _inputs = (
         list(runfiles.files) +
         list(py.transitive_eggs)
-    )
+    ) + [resources_dir]
 
     ctx.actions.run(
         mnemonic = "PexPython",
