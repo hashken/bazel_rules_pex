@@ -203,7 +203,7 @@ def _pex_binary_impl(ctx):
     ]
     arguments += [
         "--resources-directory",
-        resources_dir.path,
+        resources_dir.path + "/{}".format(ctx.attr.strip_prefix.strip("/")),
     ]
 
     # form the inputs to pex builder
@@ -331,6 +331,7 @@ pex_bin_attrs = _dmerge(pex_attrs, {
         default = True,
         mandatory = False,
     ),
+    "strip_prefix": attr.string(default = ""),
 })
 
 pex_library = rule(
@@ -396,6 +397,11 @@ Args:
     
     If unspecified, the first file from the `srcs` attribute will be used.
     It is an error to specify `entrypoint`, `main`, and `script` together.
+
+  strip_prefix: Set the path prefix to strip out from your sources.
+
+    For example: If you have `services/foo/bar.py` and you want to call it with an `entrypoint` of `foo.bar`,
+    you can set `strip_prefix` to `services`.
 
   interpreter: Path to the python interpreter the pex should to use in its shebang line.
 """
