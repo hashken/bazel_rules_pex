@@ -238,7 +238,14 @@ def _pex_binary_impl(ctx):
       "--cache-dir", ".pex/build",
       #manifest_file.path,
   ]
-  arguments += ['--resources-directory', '.']
+  arguments += [
+      '--resources-directory',
+      'bazel-out/k8-fastbuild/bin/{}/{}.runfiles/__main__/'.format(
+          ctx.build_file_path.rstrip('/BUILD'),
+          ctx.attr.name,
+          ctx.workspace_name
+      )
+  ]
 
   # form the inputs to pex builder
   _inputs = (
@@ -247,11 +254,7 @@ def _pex_binary_impl(ctx):
       list(py.transitive_eggs)
   )
 
-  print(arguments)
-  print(' '.join(arguments))
-  print(ctx.files.srcs)
-
-  ctx.action(
+  ctx.actions.run(
       mnemonic = "PexPython",
       inputs = _inputs,
       outputs = [deploy_pex],
@@ -277,7 +280,7 @@ def _pex_binary_impl(ctx):
   # There isn't much point in having both foo.pex and foo as identical pex
   # files, but someone is probably relying on that behaviour by now so we might
   # as well keep doing it.
-  ctx.action(
+  ctx.actions.run_shell(
       mnemonic = "LinkPex",
       inputs = [deploy_pex],
       outputs = [executable],
@@ -521,7 +524,7 @@ def pex_pytest(name, srcs, deps=[], eggs=[], data=[],
       eggs = eggs + [
           "@pytest_whl//file",
           "@py_whl//file",
-          "@setuptools_whl//file",
+          #"@setuptools_whl//file",
       ],
       entrypoint = "pytest",
       licenses = licenses,
@@ -563,11 +566,11 @@ def pex_repositories():
       sha256 = "1ebb8ad7e26b448e9caa4773d2357849bf80ff9e313964bcaf79cbf0201a1648",
   )
 
-  native.http_file(
-      name = "setuptools_whl",
-      url = "https://pypi.python.org/packages/e5/53/92a8ac9d252ec170d9197dcf988f07e02305a06078d7e83a41ba4e3ed65b/setuptools-33.1.1-py2.py3-none-any.whl",
-      sha256 = "4ed8f634b11fbba8c0ba9db01a8d24ad464f97a615889e9780fc74ddec956711",
-  )
+  #native.http_file(
+  #    name = "setuptools_whl",
+  #    url = "https://pypi.python.org/packages/e5/53/92a8ac9d252ec170d9197dcf988f07e02305a06078d7e83a41ba4e3ed65b/setuptools-33.1.1-py2.py3-none-any.whl",
+  #    sha256 = "4ed8f634b11fbba8c0ba9db01a8d24ad464f97a615889e9780fc74ddec956711",
+  #)
 
   native.http_file(
       name = "pex_src",
@@ -578,8 +581,8 @@ def pex_repositories():
   native.http_file(
       name = "pex_bin",
       executable = True,
-      url = "https://github.com/pantsbuild/pex/releases/download/v1.6.0/pex27",
-      sha256 = "1bd7e9f927de09af028d2cd97422f25a2829ae6ff1c97164dbdb9fe125dca392"
+      url = "https://github.com/pantsbuild/pex/releases/download/v1.6.2/pex37",
+      sha256 = "3e7460dda68fa0a6df3e1ca09b98484786483583ea2f92300fc7db2cac8b798a"
   )
 
   native.http_file(
