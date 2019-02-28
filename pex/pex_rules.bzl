@@ -519,6 +519,6 @@ def pex_repositories():
   native.http_file(
       name = "pex_bin",
       executable = True,
-      url = "https://github.com/pantsbuild/pex/releases/download/v1.6.2/pex37",
-      sha256 = "3e7460dda68fa0a6df3e1ca09b98484786483583ea2f92300fc7db2cac8b798a"
+      url = "https://github.com/pantsbuild/pex/releases/download/v1.6.2/pex27",
+      sha256 = "f6395a71b15e1cbeedfd417724413f7f7f2453ffa6a91db0dbd884ad8576a4ce"
   )
