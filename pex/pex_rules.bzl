@@ -236,20 +236,19 @@ def _pex_binary_impl(ctx):
       "--pex-root", ".pex",  # May be redundant since we also set PEX_ROOT
       "--output-file", deploy_pex.path,
       "--cache-dir", ".pex/build",
-      #manifest_file.path,
   ]
   arguments += [
       '--resources-directory',
-      'bazel-out/k8-fastbuild/bin/{}/{}.runfiles/__main__/'.format(
-          ctx.build_file_path.rstrip('/BUILD'),
-          ctx.attr.name,
-          ctx.workspace_name
+      '{bin_dir}/{build_file_dir}/{rule_name}.runfiles/{workspace_name}/'.format(
+          bin_dir=ctx.configuration.bin_dir.path,
+          build_file_dir=ctx.build_file_path.rstrip('/BUILD'),
+          rule_name=ctx.attr.name,
+          workspace_name=ctx.workspace_name
       )
   ]
 
   # form the inputs to pex builder
   _inputs = (
-      #[manifest_file] +
       list(runfiles.files) +
       list(py.transitive_eggs)
   )
@@ -354,7 +353,6 @@ pex_attrs = {
 
     # Used by pex_binary and pex_*test, not pex_library:
     "_pexbuilder": attr.label(
-        #default = Label("//pex:pex_wrapper"),
         default = Label("@pex_bin//file"),
         executable = True,
         cfg = "host",
@@ -524,7 +522,6 @@ def pex_pytest(name, srcs, deps=[], eggs=[], data=[],
       eggs = eggs + [
           "@pytest_whl//file",
           "@py_whl//file",
-          #"@setuptools_whl//file",
       ],
       entrypoint = "pytest",
       licenses = licenses,
@@ -565,12 +562,6 @@ def pex_repositories():
       url = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz",
       sha256 = "1ebb8ad7e26b448e9caa4773d2357849bf80ff9e313964bcaf79cbf0201a1648",
   )
-
-  #native.http_file(
-  #    name = "setuptools_whl",
-  #    url = "https://pypi.python.org/packages/e5/53/92a8ac9d252ec170d9197dcf988f07e02305a06078d7e83a41ba4e3ed65b/setuptools-33.1.1-py2.py3-none-any.whl",
-  #    sha256 = "4ed8f634b11fbba8c0ba9db01a8d24ad464f97a615889e9780fc74ddec956711",
-  #)
 
   native.http_file(
       name = "pex_src",
