@@ -175,7 +175,7 @@ Rules to be invoked from WORKSPACE for remote dependencies.
 ## pex_binary
 
 <pre>
-pex_binary(<a href="#pex_binary.name">name</a>, <a href="#pex_binary.deps">deps</a>, <a href="#pex_binary.data">data</a>, <a href="#pex_binary.srcs">srcs</a>, <a href="#pex_binary.disable_cache">disable_cache</a>, <a href="#pex_binary.eggs">eggs</a>, <a href="#pex_binary.entrypoint">entrypoint</a>, <a href="#pex_binary.interpreter">interpreter</a>, <a href="#pex_binary.licenses">licenses</a>, <a href="#pex_binary.main">main</a>, <a href="#pex_binary.no_index">no_index</a>, <a href="#pex_binary.pex_use_wheels">pex_use_wheels</a>, <a href="#pex_binary.pex_verbosity">pex_verbosity</a>, <a href="#pex_binary.repos">repos</a>, <a href="#pex_binary.req_files">req_files</a>, <a href="#pex_binary.reqs">reqs</a>, <a href="#pex_binary.script">script</a>, <a href="#pex_binary.zip_safe">zip_safe</a>)
+pex_binary(<a href="#pex_binary.name">name</a>, <a href="#pex_binary.deps">deps</a>, <a href="#pex_binary.data">data</a>, <a href="#pex_binary.srcs">srcs</a>, <a href="#pex_binary.disable_cache">disable_cache</a>, <a href="#pex_binary.eggs">eggs</a>, <a href="#pex_binary.entrypoint">entrypoint</a>, <a href="#pex_binary.interpreter">interpreter</a>, <a href="#pex_binary.licenses">licenses</a>, <a href="#pex_binary.main">main</a>, <a href="#pex_binary.no_index">no_index</a>, <a href="#pex_binary.pex_use_wheels">pex_use_wheels</a>, <a href="#pex_binary.pex_verbosity">pex_verbosity</a>, <a href="#pex_binary.repos">repos</a>, <a href="#pex_binary.req_files">req_files</a>, <a href="#pex_binary.reqs">reqs</a>, <a href="#pex_binary.script">script</a>, <a href="#pex_binary.strip_prefix">strip_prefix</a>, <a href="#pex_binary.zip_safe">zip_safe</a>)
 </pre>
 
 Build a deployable pex executable.
@@ -324,6 +324,15 @@ the transitive python dependencies and fetch them from pypi.</p>
 It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>script</code> together.</p>
       </td>
     </tr>
+    <tr id="pex_binary.strip_prefix">
+      <td><code>strip_prefix</code></td>
+      <td>
+        <p><code>String; Optional; Default is ''</code></p>
+        <p>Set the path prefix to strip out from your sources.</p>
+<p>For example: If you have <code>services/foo/bar.py</code> and you want to call it with an <code>entrypoint</code> of <code>foo.bar</code>,
+you can set <code>strip_prefix</code> to <code>services</code>.</p>
+      </td>
+    </tr>
     <tr id="pex_binary.zip_safe">
       <td><code>zip_safe</code></td>
       <td>
@@ -445,7 +454,7 @@ the transitive python dependencies and fetch them from pypi.</p>
 ## pex_test
 
 <pre>
-pex_test(<a href="#pex_test.name">name</a>, <a href="#pex_test.deps">deps</a>, <a href="#pex_test.data">data</a>, <a href="#pex_test.srcs">srcs</a>, <a href="#pex_test.disable_cache">disable_cache</a>, <a href="#pex_test.eggs">eggs</a>, <a href="#pex_test.entrypoint">entrypoint</a>, <a href="#pex_test.interpreter">interpreter</a>, <a href="#pex_test.licenses">licenses</a>, <a href="#pex_test.main">main</a>, <a href="#pex_test.no_index">no_index</a>, <a href="#pex_test.pex_use_wheels">pex_use_wheels</a>, <a href="#pex_test.pex_verbosity">pex_verbosity</a>, <a href="#pex_test.repos">repos</a>, <a href="#pex_test.req_files">req_files</a>, <a href="#pex_test.reqs">reqs</a>, <a href="#pex_test.script">script</a>, <a href="#pex_test.zip_safe">zip_safe</a>)
+pex_test(<a href="#pex_test.name">name</a>, <a href="#pex_test.deps">deps</a>, <a href="#pex_test.data">data</a>, <a href="#pex_test.srcs">srcs</a>, <a href="#pex_test.disable_cache">disable_cache</a>, <a href="#pex_test.eggs">eggs</a>, <a href="#pex_test.entrypoint">entrypoint</a>, <a href="#pex_test.interpreter">interpreter</a>, <a href="#pex_test.licenses">licenses</a>, <a href="#pex_test.main">main</a>, <a href="#pex_test.no_index">no_index</a>, <a href="#pex_test.pex_use_wheels">pex_use_wheels</a>, <a href="#pex_test.pex_verbosity">pex_verbosity</a>, <a href="#pex_test.repos">repos</a>, <a href="#pex_test.req_files">req_files</a>, <a href="#pex_test.reqs">reqs</a>, <a href="#pex_test.script">script</a>, <a href="#pex_test.strip_prefix">strip_prefix</a>, <a href="#pex_test.zip_safe">zip_safe</a>)
 </pre>
 
 
@@ -592,6 +601,15 @@ the transitive python dependencies and fetch them from pypi.</p>
 <p>For example: "pex --script fab fabric" or "pex --script mturk boto"</p>
 <p>If unspecified, the first file from the <code>srcs</code> attribute will be used.
 It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>script</code> together.</p>
+      </td>
+    </tr>
+    <tr id="pex_test.strip_prefix">
+      <td><code>strip_prefix</code></td>
+      <td>
+        <p><code>String; Optional; Default is ''</code></p>
+        <p>Set the path prefix to strip out from your sources.</p>
+<p>For example: If you have <code>services/foo/bar.py</code> and you want to call it with an <code>entrypoint</code> of <code>foo.bar</code>,
+you can set <code>strip_prefix</code> to <code>services</code>.</p>
       </td>
     </tr>
     <tr id="pex_test.zip_safe">
