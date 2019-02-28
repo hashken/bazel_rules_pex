@@ -172,7 +172,7 @@ def _pex_binary_impl(ctx):
     )
 
     pexbuilder = ctx.executable._pexbuilder
-    arguments = []
+    arguments = ["setuptools>=40.8.0"]
 
     # form the arguments to pex builder
     arguments += [] if ctx.attr.zip_safe else ["--not-zip-safe"]
