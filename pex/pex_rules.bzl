@@ -61,7 +61,7 @@ repo_file_types = FileType([
     ".tar.xz",
     ".tar.Z",
     ".tgz",
-    ".tbz"
+    ".tbz",
 ])
 
 # As much as I think this test file naming convention is a good thing, it's
@@ -70,223 +70,226 @@ repo_file_types = FileType([
 #
 # pex_test_file_types = FileType(["_unittest.py", "_test.py"])
 
-
 def _collect_transitive_sources(ctx):
-  source_files = depset(order="postorder")
-  for dep in ctx.attr.deps:
-    if hasattr(dep, "py"):
-      source_files += dep.py.transitive_sources
-  source_files += pex_file_types.filter(ctx.files.srcs)
-  return source_files
-
+    source_files = depset(order = "postorder")
+    for dep in ctx.attr.deps:
+        if hasattr(dep, "py"):
+            source_files += dep.py.transitive_sources
+    source_files += pex_file_types.filter(ctx.files.srcs)
+    return source_files
 
 def _collect_transitive_eggs(ctx):
-  transitive_eggs = depset(order="postorder")
-  for dep in ctx.attr.deps:
-    if hasattr(dep, "py") and hasattr(dep.py, "transitive_eggs"):
-      transitive_eggs += dep.py.transitive_eggs
-  transitive_eggs += egg_file_types.filter(ctx.files.eggs)
-  return transitive_eggs
-
+    transitive_eggs = depset(order = "postorder")
+    for dep in ctx.attr.deps:
+        if hasattr(dep, "py") and hasattr(dep.py, "transitive_eggs"):
+            transitive_eggs += dep.py.transitive_eggs
+    transitive_eggs += egg_file_types.filter(ctx.files.eggs)
+    return transitive_eggs
 
 def _collect_transitive_reqs(ctx):
-  transitive_reqs = depset(order="postorder")
-  for dep in ctx.attr.deps:
-    if hasattr(dep, "py") and hasattr(dep.py, "transitive_reqs"):
-      transitive_reqs += dep.py.transitive_reqs
-  transitive_reqs += ctx.attr.reqs
-  return transitive_reqs
-
+    transitive_reqs = depset(order = "postorder")
+    for dep in ctx.attr.deps:
+        if hasattr(dep, "py") and hasattr(dep.py, "transitive_reqs"):
+            transitive_reqs += dep.py.transitive_reqs
+    transitive_reqs += ctx.attr.reqs
+    return transitive_reqs
 
 def _collect_repos(ctx):
-  repos = {}
-  for dep in ctx.attr.deps:
-    if hasattr(dep, "py") and hasattr(dep.py, "repos"):
-      repos += dep.py.repos
-  for file in repo_file_types.filter(ctx.files.repos):
-    repos.update({file.dirname : True})
-  return repos.keys()
-
+    repos = {}
+    for dep in ctx.attr.deps:
+        if hasattr(dep, "py") and hasattr(dep.py, "repos"):
+            repos += dep.py.repos
+    for file in repo_file_types.filter(ctx.files.repos):
+        repos.update({file.dirname: True})
+    return repos.keys()
 
 def _collect_transitive(ctx):
-  return struct(
-      # These rules don't use transitive_sources internally; it's just here for
-      # parity with the native py_library rule type.
-      transitive_sources = _collect_transitive_sources(ctx),
-      transitive_eggs = _collect_transitive_eggs(ctx),
-      transitive_reqs = _collect_transitive_reqs(ctx),
-      # uses_shared_libraries = ... # native py_library has this. What is it?
-  )
-
+    return struct(
+        # These rules don't use transitive_sources internally; it's just here for
+        # parity with the native py_library rule type.
+        transitive_sources = _collect_transitive_sources(ctx),
+        transitive_eggs = _collect_transitive_eggs(ctx),
+        transitive_reqs = _collect_transitive_reqs(ctx),
+        # uses_shared_libraries = ... # native py_library has this. What is it?
+    )
 
 def _pex_library_impl(ctx):
-  transitive_files = depset(ctx.files.srcs)
-  for dep in ctx.attr.deps:
-    transitive_files += dep.default_runfiles.files
-  return struct(
-      files = depset(),
-      py = _collect_transitive(ctx),
-      runfiles = ctx.runfiles(
-          collect_default = True,
-          transitive_files = depset(transitive_files),
-      )
-  )
-
+    transitive_files = depset(ctx.files.srcs)
+    for dep in ctx.attr.deps:
+        transitive_files += dep.default_runfiles.files
+    return struct(
+        files = depset(),
+        py = _collect_transitive(ctx),
+        runfiles = ctx.runfiles(
+            collect_default = True,
+            transitive_files = depset(transitive_files),
+        ),
+    )
 
 def _pex_binary_impl(ctx):
-  transitive_files = depset(ctx.files.srcs)
+    transitive_files = depset(ctx.files.srcs)
 
-  if ctx.attr.entrypoint and ctx.file.main:
-    fail("Please specify either entrypoint or main, not both.")
+    if ctx.attr.entrypoint and ctx.file.main:
+        fail("Please specify either entrypoint or main, not both.")
 
-  main_file = None
-  main_pkg = None
-  script = None
-  if ctx.attr.entrypoint:
-    main_pkg = ctx.attr.entrypoint
-  elif ctx.file.main:
-    main_file = ctx.file.main
-  elif ctx.attr.script:
-    script = ctx.attr.script
-  elif ctx.files.srcs:
-    main_file = pex_file_types.filter(ctx.files.srcs)[0]
+    main_file = None
+    main_pkg = None
+    script = None
+    if ctx.attr.entrypoint:
+        main_pkg = ctx.attr.entrypoint
+    elif ctx.file.main:
+        main_file = ctx.file.main
+    elif ctx.attr.script:
+        script = ctx.attr.script
+    elif ctx.files.srcs:
+        main_file = pex_file_types.filter(ctx.files.srcs)[0]
 
-  if main_file:
-    # Translate main_file's short path into a python module name
-    main_pkg = main_file.short_path.replace('/', '.')[:-3]
-    transitive_files += [main_file]
+    if main_file:
+        # Translate main_file's short path into a python module name
+        main_pkg = main_file.short_path.replace("/", ".")[:-3]
+        transitive_files += [main_file]
 
-  py = _collect_transitive(ctx)
-  repos = _collect_repos(ctx)
+    py = _collect_transitive(ctx)
+    repos = _collect_repos(ctx)
 
-  for dep in ctx.attr.deps:
-    transitive_files += dep.default_runfiles.files
+    for dep in ctx.attr.deps:
+        transitive_files += dep.default_runfiles.files
 
-  runfiles = ctx.runfiles(
-      collect_default = False,
-      transitive_files = transitive_files,
-  )
+    runfiles = ctx.runfiles(
+        collect_default = False,
+        transitive_files = transitive_files,
+    )
 
-  pexbuilder = ctx.executable._pexbuilder
+    pexbuilder = ctx.executable._pexbuilder
 
-  # form the arguments to pex builder
-  arguments =  [] if ctx.attr.zip_safe else ["--not-zip-safe"]
-  arguments += [] if ctx.attr.pex_use_wheels else ["--no-use-wheel"]
-  if ctx.attr.no_index:
-    arguments += ["--no-index"]
-  if ctx.attr.disable_cache:
-    arguments += ["--disable-cache"]
-  for req_file in ctx.files.req_files:
-    arguments += ["--requirement", req_file.path]
-  for repo in repos:
-    arguments += ["--repo", repo]
-  for egg in py.transitive_eggs:
-    arguments += [egg.path]
-  for req in py.transitive_reqs:
-    arguments += [req]
-  if main_pkg:
-    arguments += ["--entry-point", main_pkg]
-  elif script:
-    arguments += ["--script", script]
-  arguments += [
-      "--pex-root", ".pex",  # May be redundant since we also set PEX_ROOT
-      "--output-file", ctx.outputs.executable.path,
-      "--cache-dir", ".pex/build",
-  ]
-  arguments += [
-      '--resources-directory',
-      '{bin_dir}/{build_file_dir}/{rule_name}.runfiles/{workspace_name}/'.format(
-          bin_dir=ctx.configuration.bin_dir.path,
-          build_file_dir=ctx.build_file_path.rstrip('/BUILD'),
-          rule_name=ctx.attr.name,
-          workspace_name=ctx.workspace_name
-      )
-  ]
+    # form the arguments to pex builder
+    arguments = [] if ctx.attr.zip_safe else ["--not-zip-safe"]
+    arguments += [] if ctx.attr.pex_use_wheels else ["--no-use-wheel"]
+    if ctx.attr.no_index:
+        arguments += ["--no-index"]
+    if ctx.attr.disable_cache:
+        arguments += ["--disable-cache"]
+    for req_file in ctx.files.req_files:
+        arguments += ["--requirement", req_file.path]
+    for repo in repos:
+        arguments += ["--repo", repo]
+    for egg in py.transitive_eggs:
+        arguments += [egg.path]
+    for req in py.transitive_reqs:
+        arguments += [req]
+    if main_pkg:
+        arguments += ["--entry-point", main_pkg]
+    elif script:
+        arguments += ["--script", script]
+    arguments += [
+        "--pex-root",
+        ".pex",  # May be redundant since we also set PEX_ROOT
+        "--output-file",
+        ctx.outputs.executable.path,
+        "--cache-dir",
+        ".pex/build",
+    ]
+    arguments += [
+        "--resources-directory",
+        "{bin_dir}/{build_file_dir}/{rule_name}.runfiles/{workspace_name}/".format(
+            bin_dir = ctx.configuration.bin_dir.path,
+            build_file_dir = ctx.build_file_path.rstrip("/BUILD"),
+            rule_name = ctx.attr.name,
+            workspace_name = ctx.workspace_name,
+        ),
+    ]
 
-  # form the inputs to pex builder
-  _inputs = (
-      list(runfiles.files) +
-      list(py.transitive_eggs)
-  )
+    # form the inputs to pex builder
+    _inputs = (
+        list(runfiles.files) +
+        list(py.transitive_eggs)
+    )
 
-  ctx.actions.run(
-      mnemonic = "PexPython",
-      inputs = _inputs,
-      outputs = [ctx.outputs.executable],
-      executable = pexbuilder,
-      execution_requirements = {
-          "requires-network": "1",
-      },
-      env = {
-          # TODO(benley): Write a repository rule to pick up certain
-          # PEX-related environment variables (like PEX_VERBOSE) from the
-          # system.
-          # Also, what if python is actually in /opt or something?
-          'PATH': '/bin:/usr/bin:/usr/local/bin',
-          'PEX_VERBOSE': str(ctx.attr.pex_verbosity),
-          'PEX_PYTHON': str(ctx.attr.interpreter),
-          'PEX_ROOT': '.pex',  # So pex doesn't try to unpack into $HOME/.pex
-      },
-      arguments = arguments,
-  )
+    ctx.actions.run(
+        mnemonic = "PexPython",
+        inputs = _inputs,
+        outputs = [ctx.outputs.executable],
+        executable = pexbuilder,
+        execution_requirements = {
+            "requires-network": "1",
+        },
+        env = {
+            # TODO(benley): Write a repository rule to pick up certain
+            # PEX-related environment variables (like PEX_VERBOSE) from the
+            # system.
+            # Also, what if python is actually in /opt or something?
+            "PATH": "/bin:/usr/bin:/usr/local/bin",
+            "PEX_VERBOSE": str(ctx.attr.pex_verbosity),
+            "PEX_PYTHON": str(ctx.attr.interpreter),
+            "PEX_ROOT": ".pex",  # So pex doesn't try to unpack into $HOME/.pex
+        },
+        arguments = arguments,
+    )
 
-  return struct(
-      files = depset([ctx.outputs.executable]),  # Which files show up in cmdline output
-      runfiles = runfiles,
-  )
-
+    return struct(
+        files = depset([ctx.outputs.executable]),  # Which files show up in cmdline output
+        runfiles = runfiles,
+    )
 
 def _get_runfile_path(ctx, f):
-  """Return the path to f, relative to runfiles."""
-  if ctx.workspace_name:
-    return ctx.workspace_name + "/" + f.short_path
-  else:
-    return f.short_path
-
+    """Return the path to f, relative to runfiles."""
+    if ctx.workspace_name:
+        return ctx.workspace_name + "/" + f.short_path
+    else:
+        return f.short_path
 
 def _pex_pytest_impl(ctx):
-  test_runner = ctx.executable.runner
-  output_file = ctx.outputs.executable
+    test_runner = ctx.executable.runner
+    output_file = ctx.outputs.executable
 
-  test_file_paths = ["${RUNFILES}/" + _get_runfile_path(ctx, f) for f in ctx.files.srcs]
-  ctx.template_action(
-      template = ctx.file.launcher_template,
-      output = output_file,
-      substitutions = {
-          "%test_runner%": _get_runfile_path(ctx, test_runner),
-          "%test_files%": " \\\n    ".join(test_file_paths),
-      },
-      executable = True,
-  )
+    test_file_paths = ["${RUNFILES}/" + _get_runfile_path(ctx, f) for f in ctx.files.srcs]
+    ctx.template_action(
+        template = ctx.file.launcher_template,
+        output = output_file,
+        substitutions = {
+            "%test_runner%": _get_runfile_path(ctx, test_runner),
+            "%test_files%": " \\\n    ".join(test_file_paths),
+        },
+        executable = True,
+    )
 
-  transitive_files = depset(ctx.files.srcs + [test_runner])
-  for dep in ctx.attr.deps:
-    transitive_files += dep.default_runfiles
+    transitive_files = depset(ctx.files.srcs + [test_runner])
+    for dep in ctx.attr.deps:
+        transitive_files += dep.default_runfiles
 
-  return struct(
-      runfiles = ctx.runfiles(
-          files = [output_file],
-          transitive_files = transitive_files,
-          collect_default = True
-      )
-  )
-
+    return struct(
+        runfiles = ctx.runfiles(
+            files = [output_file],
+            transitive_files = transitive_files,
+            collect_default = True,
+        ),
+    )
 
 pex_attrs = {
-    "srcs": attr.label_list(flags = ["DIRECT_COMPILE_TIME_INPUT"],
-                            allow_files = pex_file_types),
+    "srcs": attr.label_list(
+        flags = ["DIRECT_COMPILE_TIME_INPUT"],
+        allow_files = pex_file_types,
+    ),
     "deps": attr.label_list(allow_files = False),
-    "eggs": attr.label_list(flags = ["DIRECT_COMPILE_TIME_INPUT"],
-                            allow_files = egg_file_types),
+    "eggs": attr.label_list(
+        flags = ["DIRECT_COMPILE_TIME_INPUT"],
+        allow_files = egg_file_types,
+    ),
     "reqs": attr.string_list(),
-    "req_files": attr.label_list(flags = ["DIRECT_COMPILE_TIME_INPUT"],
-                            allow_files = req_file_types),
-    "no_index": attr.bool(default=False),
-    "disable_cache": attr.bool(default=False),
-    "repos": attr.label_list(flags = ["DIRECT_COMPILE_TIME_INPUT"],
-                            allow_files = repo_file_types),
-    "data": attr.label_list(allow_files = True,
-                            cfg = "data"),
+    "req_files": attr.label_list(
+        flags = ["DIRECT_COMPILE_TIME_INPUT"],
+        allow_files = req_file_types,
+    ),
+    "no_index": attr.bool(default = False),
+    "disable_cache": attr.bool(default = False),
+    "repos": attr.label_list(
+        flags = ["DIRECT_COMPILE_TIME_INPUT"],
+        allow_files = repo_file_types,
+    ),
+    "data": attr.label_list(
+        allow_files = True,
+        cfg = "data",
+    ),
 
     # required for pex_library targets in third_party subdirs
     # but theoretically a common attribute for all rules
@@ -300,23 +303,23 @@ pex_attrs = {
     ),
 }
 
-
 def _dmerge(a, b):
-  """Merge two dictionaries, a+b
+    """Merge two dictionaries, a+b
 
-  Workaround for https://github.com/bazelbuild/skydoc/issues/10
-  """
-  return dict(a.items() + b.items())
-
+    Workaround for https://github.com/bazelbuild/skydoc/issues/10
+    """
+    return dict(a.items() + b.items())
 
 pex_bin_attrs = _dmerge(pex_attrs, {
-    "main": attr.label(allow_files = True,
-                       single_file = True),
+    "main": attr.label(
+        allow_files = True,
+        single_file = True,
+    ),
     "entrypoint": attr.string(),
     "script": attr.string(),
     "interpreter": attr.string(),
-    "pex_use_wheels": attr.bool(default=True),
-    "pex_verbosity": attr.int(default=0),
+    "pex_use_wheels": attr.bool(default = True),
+    "pex_verbosity": attr.int(default = 0),
     "zip_safe": attr.bool(
         default = True,
         mandatory = False,
@@ -325,7 +328,7 @@ pex_bin_attrs = _dmerge(pex_attrs, {
 
 pex_library = rule(
     _pex_library_impl,
-    attrs = pex_attrs
+    attrs = pex_attrs,
 )
 
 pex_binary = rule(
@@ -415,86 +418,89 @@ _pytest_pex_test = rule(
     }),
 )
 
+def pex_pytest(
+        name,
+        srcs,
+        deps = [],
+        eggs = [],
+        data = [],
+        args = [],
+        flaky = False,
+        licenses = [],
+        local = None,
+        size = None,
+        timeout = None,
+        tags = [],
+        **kwargs):
+    """A variant of pex_test that uses py.test to run one or more sets of tests.
 
-def pex_pytest(name, srcs, deps=[], eggs=[], data=[],
-               args=[],
-               flaky=False,
-               licenses=[],
-               local=None,
-               size=None,
-               timeout=None,
-               tags=[],
-               **kwargs):
-  """A variant of pex_test that uses py.test to run one or more sets of tests.
+    This produces two things:
 
-  This produces two things:
+      1. A pex_binary (`<name>_runner`) containing all your code and its
+         dependencies, plus py.test, and the entrypoint set to the py.test
+         runner.
+      2. A small shell script to launch the `<name>_runner` executable with each
+         of the `srcs` enumerated as commandline arguments.  This is the actual
+         test entrypoint for bazel.
 
-    1. A pex_binary (`<name>_runner`) containing all your code and its
-       dependencies, plus py.test, and the entrypoint set to the py.test
-       runner.
-    2. A small shell script to launch the `<name>_runner` executable with each
-       of the `srcs` enumerated as commandline arguments.  This is the actual
-       test entrypoint for bazel.
+    Almost all of the attributes that can be used with pex_test work identically
+    here, including those not specifically mentioned in this docstring.
+    Exceptions are `main` and `entrypoint`, which cannot be used with this macro.
 
-  Almost all of the attributes that can be used with pex_test work identically
-  here, including those not specifically mentioned in this docstring.
-  Exceptions are `main` and `entrypoint`, which cannot be used with this macro.
+    Args:
 
-  Args:
+      srcs: List of files containing tests that should be run.
+    """
+    if "main" in kwargs:
+        fail("Specifying a `main` file makes no sense for pex_pytest.")
+    if "entrypoint" in kwargs:
+        fail("Do not specify `entrypoint` for pex_pytest.")
 
-    srcs: List of files containing tests that should be run.
-  """
-  if "main" in kwargs:
-    fail("Specifying a `main` file makes no sense for pex_pytest.")
-  if "entrypoint" in kwargs:
-    fail("Do not specify `entrypoint` for pex_pytest.")
-
-  pex_binary(
-      name = "%s_runner" % name,
-      srcs = srcs,
-      deps = deps,
-      data = data,
-      eggs = eggs + [
-          "@pytest_whl//file",
-          "@py_whl//file",
-      ],
-      entrypoint = "pytest",
-      licenses = licenses,
-      testonly = True,
-      **kwargs
-  )
-  _pytest_pex_test(
-      name = name,
-      runner = ":%s_runner" % name,
-      args = args,
-      data = data,
-      flaky = flaky,
-      licenses = licenses,
-      local = local,
-      size = size,
-      srcs = srcs,
-      timeout = timeout,
-      tags = tags,
-  )
-
+    pex_binary(
+        name = "%s_runner" % name,
+        srcs = srcs,
+        deps = deps,
+        data = data,
+        eggs = eggs + [
+            "@pytest_whl//file",
+            "@py_whl//file",
+        ],
+        entrypoint = "pytest",
+        licenses = licenses,
+        testonly = True,
+        **kwargs
+    )
+    _pytest_pex_test(
+        name = name,
+        runner = ":%s_runner" % name,
+        args = args,
+        data = data,
+        flaky = flaky,
+        licenses = licenses,
+        local = local,
+        size = size,
+        srcs = srcs,
+        timeout = timeout,
+        tags = tags,
+    )
 
 def pex_repositories():
-  """Rules to be invoked from WORKSPACE for remote dependencies."""
-  native.http_file(
-      name = 'pytest_whl',
-      url = 'https://pypi.python.org/packages/8c/7d/f5d71f0e28af32388e07bd4ce0dbd2b3539693aadcae4403266173ec87fa/pytest-3.2.3-py2.py3-none-any.whl',
-      sha256 = '81a25f36a97da3313e1125fce9e7bbbba565bc7fec3c5beb14c262ddab238ac1'
-  )
+    """Rules to be invoked from WORKSPACE for remote dependencies."""
+    native.http_file(
+        name = "pytest_whl",
+        url = "https://pypi.python.org/packages/8c/7d/f5d71f0e28af32388e07bd4ce0dbd2b3539693aadcae4403266173ec87fa/pytest-3.2.3-py2.py3-none-any.whl",
+        sha256 = "81a25f36a97da3313e1125fce9e7bbbba565bc7fec3c5beb14c262ddab238ac1",
+    )
 
-  native.http_file(
-      name = 'py_whl',
-      url = 'https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl',
-      sha256 = '2ccb79b01769d99115aa600d7eed99f524bf752bba8f041dc1c184853514655a'
-  )
+    native.http_file(
+        name = "py_whl",
+        url = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl",
+        sha256 = "2ccb79b01769d99115aa600d7eed99f524bf752bba8f041dc1c184853514655a",
+    )
 
-  native.http_file(
-      name = "pex_bin",
-      executable = True,
-      url = "https://github.com/pantsbuild/pex/releases/download/v1.6.2/pex27",
-      sha256 = "f6395a71b15e1cbeedfd417724413f7f7f2453ffa6a91db0dbd884ad8576a4ce"
-  )
+    native.http_file(
+        name = "pex_bin",
+        executable = True,
+        url = "https://github.com/pantsbuild/pex/releases/download/v1.6.2/pex27",
+        sha256 = "f6395a71b15e1cbeedfd417724413f7f7f2453ffa6a91db0dbd884ad8576a4ce",
+    )
