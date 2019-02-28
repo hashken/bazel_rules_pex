@@ -156,9 +156,6 @@ def _pex_binary_impl(ctx):
     main_pkg = main_file.short_path.replace('/', '.')[:-3]
     transitive_files += [main_file]
 
-  deploy_pex = ctx.new_file(
-      ctx.configuration.bin_dir, ctx.outputs.executable, '.pex')
-
   py = _collect_transitive(ctx)
   repos = _collect_repos(ctx)
 
@@ -193,7 +190,7 @@ def _pex_binary_impl(ctx):
     arguments += ["--script", script]
   arguments += [
       "--pex-root", ".pex",  # May be redundant since we also set PEX_ROOT
-      "--output-file", deploy_pex.path,
+      "--output-file", ctx.outputs.executable.path,
       "--cache-dir", ".pex/build",
   ]
   arguments += [
@@ -215,7 +212,7 @@ def _pex_binary_impl(ctx):
   ctx.actions.run(
       mnemonic = "PexPython",
       inputs = _inputs,
-      outputs = [deploy_pex],
+      outputs = [ctx.outputs.executable],
       executable = pexbuilder,
       execution_requirements = {
           "requires-network": "1",
@@ -233,23 +230,8 @@ def _pex_binary_impl(ctx):
       arguments = arguments,
   )
 
-  executable = ctx.outputs.executable
-
-  # There isn't much point in having both foo.pex and foo as identical pex
-  # files, but someone is probably relying on that behaviour by now so we might
-  # as well keep doing it.
-  ctx.actions.run_shell(
-      mnemonic = "LinkPex",
-      inputs = [deploy_pex],
-      outputs = [executable],
-      command = "ln -f {pex} {exe} 2>/dev/null || cp -f {pex} {exe}".format(
-          pex = deploy_pex.path,
-          exe = executable.path,
-      ),
-  )
-
   return struct(
-      files = depset([executable]),  # Which files show up in cmdline output
+      files = depset([ctx.outputs.executable]),  # Which files show up in cmdline output
       runfiles = runfiles,
   )
 
@@ -346,15 +328,10 @@ pex_library = rule(
     attrs = pex_attrs
 )
 
-pex_binary_outputs = {
-    "deploy_pex": "%{name}.pex"
-}
-
 pex_binary = rule(
     _pex_binary_impl,
     executable = True,
     attrs = pex_bin_attrs,
-    outputs = pex_binary_outputs,
 )
 """Build a deployable pex executable.
 
@@ -417,7 +394,6 @@ pex_test = rule(
     _pex_binary_impl,
     executable = True,
     attrs = pex_bin_attrs,
-    outputs = pex_binary_outputs,
     test = True,
 )
 
