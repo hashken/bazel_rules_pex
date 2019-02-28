@@ -155,11 +155,6 @@ def _pex_binary_impl(ctx):
     for dep in ctx.attr.deps:
         transitive_files += dep.default_runfiles.files
 
-    runfiles = ctx.runfiles(
-        collect_default = False,
-        transitive_files = transitive_files,
-    )
-
     resources_dir = ctx.actions.declare_directory("resources")
     ctx.actions.run_shell(
         mnemonic = "CreateResourceDirectory",
@@ -208,7 +203,6 @@ def _pex_binary_impl(ctx):
 
     # form the inputs to pex builder
     _inputs = (
-        list(runfiles.files) +
         list(py.transitive_eggs)
     ) + [resources_dir]
 
@@ -235,7 +229,6 @@ def _pex_binary_impl(ctx):
 
     return struct(
         files = depset([ctx.outputs.executable]),  # Which files show up in cmdline output
-        runfiles = runfiles,
     )
 
 def _get_runfile_path(ctx, f):
