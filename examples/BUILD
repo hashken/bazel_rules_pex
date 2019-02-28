@@ -2,12 +2,23 @@ load("//pex:pex_rules.bzl", "pex_binary", "pex_library", "pex_pytest")
 
 pex_binary(
     name = "foo",
-    srcs = ["foo.py"],
+    srcs = [
+        "__init__.py",
+        "foo.py"
+    ],
+    reqs = [
+        "flask",
+        "pyyaml",
+    ],
+    entrypoint = "examples.foo:main"
 )
 
 pex_library(
     name = "libfoo",
-    srcs = ["foo.py"],
+    srcs = [
+        "__init__.py",
+        "foo.py"
+    ],
     reqs = [
         "flask",
         "pyyaml",
@@ -17,7 +28,10 @@ pex_library(
 pex_pytest(
     name = "foo_test",
     size = "small",
-    srcs = ["foo_test.py"],
+    srcs = [
+        "__init__.py",
+        "foo_test.py"
+    ],
     args = ["--strict"],
     deps = [":libfoo"],
 )

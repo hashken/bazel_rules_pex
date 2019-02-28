@@ -133,37 +133,6 @@ def _pex_library_impl(ctx):
   )
 
 
-def _gen_manifest(py, runfiles):
-  """Generate a manifest for pex_wrapper.
-
-  Returns:
-      struct(
-          modules = [struct(src = "path_on_disk", dest = "path_in_pex"), ...],
-          requirements = ["pypi_package", ...],
-          prebuiltLibraries = ["path_on_disk", ...],
-      )
-  """
-
-  pex_files = []
-
-  for f in runfiles.files:
-    dpath = f.short_path
-    if dpath.startswith("../"):
-      dpath = dpath[3:]
-    pex_files.append(
-        struct(
-            src = f.path,
-            dest = dpath,
-        ),
-    )
-
-  return struct(
-      modules = pex_files,
-      requirements = list(py.transitive_reqs),
-      prebuiltLibraries = [f.path for f in py.transitive_eggs],
-  )
-
-
 def _pex_binary_impl(ctx):
   transitive_files = depset(ctx.files.srcs)
 
@@ -195,19 +164,10 @@ def _pex_binary_impl(ctx):
 
   for dep in ctx.attr.deps:
     transitive_files += dep.default_runfiles.files
+
   runfiles = ctx.runfiles(
-      collect_default = True,
+      collect_default = False,
       transitive_files = transitive_files,
-  )
-
-  manifest_file = ctx.new_file(
-      ctx.configuration.bin_dir, deploy_pex, '_manifest')
-
-  manifest = _gen_manifest(py, runfiles)
-
-  ctx.file_action(
-      output = manifest_file,
-      content = manifest.to_json(),
   )
 
   pexbuilder = ctx.executable._pexbuilder
@@ -224,7 +184,9 @@ def _pex_binary_impl(ctx):
   for repo in repos:
     arguments += ["--repo", repo]
   for egg in py.transitive_eggs:
-    arguments += ["--find-links", egg.dirname]
+    arguments += [egg.path]
+  for req in py.transitive_reqs:
+    arguments += [req]
   if main_pkg:
     arguments += ["--entry-point", main_pkg]
   elif script:
@@ -233,17 +195,24 @@ def _pex_binary_impl(ctx):
       "--pex-root", ".pex",  # May be redundant since we also set PEX_ROOT
       "--output-file", deploy_pex.path,
       "--cache-dir", ".pex/build",
-      manifest_file.path,
+  ]
+  arguments += [
+      '--resources-directory',
+      '{bin_dir}/{build_file_dir}/{rule_name}.runfiles/{workspace_name}/'.format(
+          bin_dir=ctx.configuration.bin_dir.path,
+          build_file_dir=ctx.build_file_path.rstrip('/BUILD'),
+          rule_name=ctx.attr.name,
+          workspace_name=ctx.workspace_name
+      )
   ]
 
   # form the inputs to pex builder
   _inputs = (
-      [manifest_file] +
       list(runfiles.files) +
       list(py.transitive_eggs)
   )
 
-  ctx.action(
+  ctx.actions.run(
       mnemonic = "PexPython",
       inputs = _inputs,
       outputs = [deploy_pex],
@@ -269,7 +238,7 @@ def _pex_binary_impl(ctx):
   # There isn't much point in having both foo.pex and foo as identical pex
   # files, but someone is probably relying on that behaviour by now so we might
   # as well keep doing it.
-  ctx.action(
+  ctx.actions.run_shell(
       mnemonic = "LinkPex",
       inputs = [deploy_pex],
       outputs = [executable],
@@ -343,7 +312,7 @@ pex_attrs = {
 
     # Used by pex_binary and pex_*test, not pex_library:
     "_pexbuilder": attr.label(
-        default = Label("//pex:pex_wrapper"),
+        default = Label("@pex_bin//file"),
         executable = True,
         cfg = "host",
     ),
@@ -512,7 +481,6 @@ def pex_pytest(name, srcs, deps=[], eggs=[], data=[],
       eggs = eggs + [
           "@pytest_whl//file",
           "@py_whl//file",
-          "@setuptools_whl//file",
       ],
       entrypoint = "pytest",
       licenses = licenses,
@@ -549,65 +517,8 @@ def pex_repositories():
   )
 
   native.http_file(
-      name = "wheel_src",
-      url = "https://pypi.python.org/packages/c9/1d/bd19e691fd4cfe908c76c429fe6e4436c9e83583c4414b54f6c85471954a/wheel-0.29.0.tar.gz",
-      sha256 = "1ebb8ad7e26b448e9caa4773d2357849bf80ff9e313964bcaf79cbf0201a1648",
-  )
-
-  native.http_file(
-      name = "setuptools_whl",
-      url = "https://pypi.python.org/packages/e5/53/92a8ac9d252ec170d9197dcf988f07e02305a06078d7e83a41ba4e3ed65b/setuptools-33.1.1-py2.py3-none-any.whl",
-      sha256 = "4ed8f634b11fbba8c0ba9db01a8d24ad464f97a615889e9780fc74ddec956711",
-  )
-
-  native.http_file(
-      name = "pex_src",
-      url = "https://files.pythonhosted.org/packages/3a/56/764c410c167d10711f6def4d54b0d4d7c3f711d5a89b27370914e4b954e9/pex-1.4.9.tar.gz",
-      sha256 = "e532cce043f24c314973e02168c64f26546b98a0dd195b30123d5b91a4b1a947",
-  )
-
-  native.http_file(
-      name = "requests_src",
-      url = "https://files.pythonhosted.org/packages/54/1f/782a5734931ddf2e1494e4cd615a51ff98e1879cbe9eecbdfeaf09aa75e9/requests-2.19.1.tar.gz",
-      sha256 = "ec22d826a36ed72a7358ff3fe56cbd4ba69dd7a6718ffd450ff0e9df7a47ce6a",
-  )
-
-  native.http_file(
-      name = "urllib3_whl",
-      url = "https://files.pythonhosted.org/packages/bd/c9/6fdd990019071a4a32a5e7cb78a1d92c53851ef4f56f62a3486e6a7d8ffb/urllib3-1.23-py2.py3-none-any.whl",
-      sha256 = "b5725a0bd4ba422ab0e66e89e030c806576753ea3ee08554382c14e685d117b5",
-  )
-
-  native.http_file(
-      name = "idna_whl",
-      url = "https://pypi.python.org/packages/27/cc/6dd9a3869f15c2edfab863b992838277279ce92663d334df9ecf5106f5c6/idna-2.6-py2.py3-none-any.whl",
-      sha256 = "8c7309c718f94b3a625cb648ace320157ad16ff131ae0af362c9f21b80ef6ec4",
-  )
-
-  native.http_file(
-      name = "certifi_whl",
-      url = "https://pypi.python.org/packages/40/66/06130724e8205fc8c105db7edb92871c7fff7d31324d7f4405c762624a43/certifi-2017.7.27.1-py2.py3-none-any.whl",
-      sha256 = "54a07c09c586b0e4c619f02a5e94e36619da8e2b053e20f594348c0611803704",
-  )
-
-  native.http_file(
-      name = "chardet_whl",
-      url = "https://pypi.python.org/packages/bc/a9/01ffebfb562e4274b6487b4bb1ddec7ca55ec7510b22e4c51f14098443b8/chardet-3.0.4-py2.py3-none-any.whl",
-      sha256 = "fc323ffcaeaed0e0a02bf4d117757b98aed530d9ed4531e3e15460124c106691",
-  )
-
-  native.new_http_archive(
-      name = "virtualenv",
-      url = "https://pypi.python.org/packages/d4/0c/9840c08189e030873387a73b90ada981885010dd9aea134d6de30cd24cb8/virtualenv-15.1.0.tar.gz",
-      sha256 = "02f8102c2436bb03b3ee6dede1919d1dac8a427541652e5ec95171ec8adbc93a",
-      strip_prefix = "virtualenv-15.1.0",
-      build_file_content = "\n".join([
-          "py_binary(",
-          "    name = 'virtualenv',",
-          "    srcs = ['virtualenv.py'],",
-          # exclude .pyc: Otherwise bazel detects a change after running virtualenv.py
-          "    data = glob(['**/*'], exclude=['*.pyc']),",
-          "    visibility = ['//visibility:public'],",
-          ")",
-      ])
+      name = "pex_bin",
+      executable = True,
+      url = "https://github.com/pantsbuild/pex/releases/download/v1.6.2/pex37",
+      sha256 = "3e7460dda68fa0a6df3e1ca09b98484786483583ea2f92300fc7db2cac8b798a"
   )
