@@ -205,6 +205,8 @@ def _pex_binary_impl(ctx):
             genfiles_dir = ctx.configuration.genfiles_dir.path,
             strip_prefix = ctx.attr.strip_prefix.strip("/"),
         ),
+        "--pex-root",
+        "$(mktemp -d)" if ctx.attr.disable_cache else ".pex",  # So pex doesn't try to unpack into $HOME/.pex
         "--output-file",
         ctx.outputs.executable.path,
     ]
@@ -231,7 +233,6 @@ def _pex_binary_impl(ctx):
             "PATH": "/bin:/usr/bin:/usr/local/bin",
             "PEX_VERBOSE": str(ctx.attr.pex_verbosity),
             "PEX_PYTHON": str(ctx.attr.interpreter),
-            "PEX_ROOT": "$(mktemp -d)" if ctx.attr.disable_cache else ".pex",  # So pex doesn't try to unpack into $HOME/.pex
         },
         arguments = arguments,
     )
