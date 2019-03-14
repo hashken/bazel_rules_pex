@@ -175,12 +175,16 @@ def _pex_binary_impl(ctx):
     arguments = ["setuptools>=40.8.0"]
 
     # form the arguments to pex builder
-    arguments += [] if ctx.attr.zip_safe else ["--not-zip-safe"]
-    arguments += [] if ctx.attr.pex_use_wheels else ["--no-use-wheel"]
+    if not ctx.attr.zip_safe:
+        arguments += ["--not-zip-safe"]
+    if not ctx.attr.use_wheels:
+        arguments += ["--no-use-wheel"]
     if ctx.attr.no_index:
         arguments += ["--no-index"]
     if ctx.attr.disable_cache:
         arguments += ["--disable-cache"]
+    for interpreter in ctx.attr.interpreters:
+        arguments += ["--python", interpreter]
     for req_file in ctx.files.req_files:
         arguments += ["--requirement", req_file.path]
     for repo in repos:
@@ -231,8 +235,7 @@ def _pex_binary_impl(ctx):
             # system.
             # Also, what if python is actually in /opt or something?
             "PATH": "/bin:/usr/bin:/usr/local/bin",
-            "PEX_VERBOSE": str(ctx.attr.pex_verbosity),
-            "PEX_PYTHON": str(ctx.attr.interpreter),
+            "PEX_VERBOSE": str(ctx.attr.verbosity),
         },
         arguments = arguments,
     )
@@ -328,9 +331,9 @@ pex_bin_attrs = _dmerge(pex_attrs, {
     ),
     "entrypoint": attr.string(),
     "script": attr.string(),
-    "interpreter": attr.string(),
-    "pex_use_wheels": attr.bool(default = True),
-    "pex_verbosity": attr.int(default = 0),
+    "interpreters": attr.string_list(),
+    "use_wheels": attr.bool(default = True),
+    "verbosity": attr.int(default = 0),
     "zip_safe": attr.bool(
         default = True,
         mandatory = False,
@@ -407,7 +410,10 @@ Args:
     For example: If you have `services/foo/bar.py` and you want to call it with an `entrypoint` of `foo.bar`,
     you can set `strip_prefix` to `services`.
 
-  interpreter: Path to the python interpreter the pex should to use in its shebang line.
+  interpreters: The list of python interpreters used to build the pex. Either specify explicit paths to interpreters
+    or specify binary names.
+
+  verbosity: Set logging verbosity level.
 """
 
 pex_test = rule(
