@@ -175,7 +175,7 @@ Rules to be invoked from WORKSPACE for remote dependencies.
 ## pex_binary
 
 <pre>
-pex_binary(<a href="#pex_binary.name">name</a>, <a href="#pex_binary.deps">deps</a>, <a href="#pex_binary.data">data</a>, <a href="#pex_binary.srcs">srcs</a>, <a href="#pex_binary.disable_cache">disable_cache</a>, <a href="#pex_binary.eggs">eggs</a>, <a href="#pex_binary.entrypoint">entrypoint</a>, <a href="#pex_binary.interpreter">interpreter</a>, <a href="#pex_binary.licenses">licenses</a>, <a href="#pex_binary.main">main</a>, <a href="#pex_binary.no_index">no_index</a>, <a href="#pex_binary.pex_use_wheels">pex_use_wheels</a>, <a href="#pex_binary.pex_verbosity">pex_verbosity</a>, <a href="#pex_binary.repos">repos</a>, <a href="#pex_binary.req_files">req_files</a>, <a href="#pex_binary.reqs">reqs</a>, <a href="#pex_binary.script">script</a>, <a href="#pex_binary.strip_prefix">strip_prefix</a>, <a href="#pex_binary.zip_safe">zip_safe</a>)
+pex_binary(<a href="#pex_binary.name">name</a>, <a href="#pex_binary.deps">deps</a>, <a href="#pex_binary.data">data</a>, <a href="#pex_binary.srcs">srcs</a>, <a href="#pex_binary.disable_cache">disable_cache</a>, <a href="#pex_binary.eggs">eggs</a>, <a href="#pex_binary.entrypoint">entrypoint</a>, <a href="#pex_binary.interpreters">interpreters</a>, <a href="#pex_binary.licenses">licenses</a>, <a href="#pex_binary.main">main</a>, <a href="#pex_binary.no_index">no_index</a>, <a href="#pex_binary.repos">repos</a>, <a href="#pex_binary.req_files">req_files</a>, <a href="#pex_binary.reqs">reqs</a>, <a href="#pex_binary.script">script</a>, <a href="#pex_binary.strip_prefix">strip_prefix</a>, <a href="#pex_binary.use_wheels">use_wheels</a>, <a href="#pex_binary.verbosity">verbosity</a>, <a href="#pex_binary.zip_safe">zip_safe</a>)
 </pre>
 
 Build a deployable pex executable.
@@ -246,11 +246,12 @@ will be relative to the workspace root.</p>
 It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>script</code> together.</p>
       </td>
     </tr>
-    <tr id="pex_binary.interpreter">
-      <td><code>interpreter</code></td>
+    <tr id="pex_binary.interpreters">
+      <td><code>interpreters</code></td>
       <td>
-        <p><code>String; Optional; Default is ''</code></p>
-        <p>Path to the python interpreter the pex should to use in its shebang line.</p>
+        <p><code>List of strings; Optional; Default is []</code></p>
+        <p>The list of python interpreters used to build the pex. Either specify explicit paths to interpreters
+or specify binary names.</p>
       </td>
     </tr>
     <tr id="pex_binary.licenses">
@@ -273,18 +274,6 @@ It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>
       <td>
         <p><code>Boolean; Optional; Default is False</code></p>
         <p>If True, don't use pypi to resolve dependencies for <code>reqs</code> and <code>req_files</code>; Default: False</p>
-      </td>
-    </tr>
-    <tr id="pex_binary.pex_use_wheels">
-      <td><code>pex_use_wheels</code></td>
-      <td>
-        <p><code>Boolean; Optional; Default is True</code></p>
-      </td>
-    </tr>
-    <tr id="pex_binary.pex_verbosity">
-      <td><code>pex_verbosity</code></td>
-      <td>
-        <p><code>Integer; Optional; Default is 0</code></p>
       </td>
     </tr>
     <tr id="pex_binary.repos">
@@ -331,6 +320,19 @@ It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>
         <p>Set the path prefix to strip out from your sources.</p>
 <p>For example: If you have <code>services/foo/bar.py</code> and you want to call it with an <code>entrypoint</code> of <code>foo.bar</code>,
 you can set <code>strip_prefix</code> to <code>services</code>.</p>
+      </td>
+    </tr>
+    <tr id="pex_binary.use_wheels">
+      <td><code>use_wheels</code></td>
+      <td>
+        <p><code>Boolean; Optional; Default is True</code></p>
+      </td>
+    </tr>
+    <tr id="pex_binary.verbosity">
+      <td><code>verbosity</code></td>
+      <td>
+        <p><code>Integer; Optional; Default is 0</code></p>
+        <p>Set logging verbosity level.</p>
       </td>
     </tr>
     <tr id="pex_binary.zip_safe">
@@ -454,7 +456,7 @@ the transitive python dependencies and fetch them from pypi.</p>
 ## pex_test
 
 <pre>
-pex_test(<a href="#pex_test.name">name</a>, <a href="#pex_test.deps">deps</a>, <a href="#pex_test.data">data</a>, <a href="#pex_test.srcs">srcs</a>, <a href="#pex_test.disable_cache">disable_cache</a>, <a href="#pex_test.eggs">eggs</a>, <a href="#pex_test.entrypoint">entrypoint</a>, <a href="#pex_test.interpreter">interpreter</a>, <a href="#pex_test.licenses">licenses</a>, <a href="#pex_test.main">main</a>, <a href="#pex_test.no_index">no_index</a>, <a href="#pex_test.pex_use_wheels">pex_use_wheels</a>, <a href="#pex_test.pex_verbosity">pex_verbosity</a>, <a href="#pex_test.repos">repos</a>, <a href="#pex_test.req_files">req_files</a>, <a href="#pex_test.reqs">reqs</a>, <a href="#pex_test.script">script</a>, <a href="#pex_test.strip_prefix">strip_prefix</a>, <a href="#pex_test.zip_safe">zip_safe</a>)
+pex_test(<a href="#pex_test.name">name</a>, <a href="#pex_test.deps">deps</a>, <a href="#pex_test.data">data</a>, <a href="#pex_test.srcs">srcs</a>, <a href="#pex_test.disable_cache">disable_cache</a>, <a href="#pex_test.eggs">eggs</a>, <a href="#pex_test.entrypoint">entrypoint</a>, <a href="#pex_test.interpreters">interpreters</a>, <a href="#pex_test.licenses">licenses</a>, <a href="#pex_test.main">main</a>, <a href="#pex_test.no_index">no_index</a>, <a href="#pex_test.repos">repos</a>, <a href="#pex_test.req_files">req_files</a>, <a href="#pex_test.reqs">reqs</a>, <a href="#pex_test.script">script</a>, <a href="#pex_test.strip_prefix">strip_prefix</a>, <a href="#pex_test.use_wheels">use_wheels</a>, <a href="#pex_test.verbosity">verbosity</a>, <a href="#pex_test.zip_safe">zip_safe</a>)
 </pre>
 
 
@@ -525,11 +527,12 @@ will be relative to the workspace root.</p>
 It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>script</code> together.</p>
       </td>
     </tr>
-    <tr id="pex_test.interpreter">
-      <td><code>interpreter</code></td>
+    <tr id="pex_test.interpreters">
+      <td><code>interpreters</code></td>
       <td>
-        <p><code>String; Optional; Default is ''</code></p>
-        <p>Path to the python interpreter the pex should to use in its shebang line.</p>
+        <p><code>List of strings; Optional; Default is []</code></p>
+        <p>The list of python interpreters used to build the pex. Either specify explicit paths to interpreters
+or specify binary names.</p>
       </td>
     </tr>
     <tr id="pex_test.licenses">
@@ -552,18 +555,6 @@ It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>
       <td>
         <p><code>Boolean; Optional; Default is False</code></p>
         <p>If True, don't use pypi to resolve dependencies for <code>reqs</code> and <code>req_files</code>; Default: False</p>
-      </td>
-    </tr>
-    <tr id="pex_test.pex_use_wheels">
-      <td><code>pex_use_wheels</code></td>
-      <td>
-        <p><code>Boolean; Optional; Default is True</code></p>
-      </td>
-    </tr>
-    <tr id="pex_test.pex_verbosity">
-      <td><code>pex_verbosity</code></td>
-      <td>
-        <p><code>Integer; Optional; Default is 0</code></p>
       </td>
     </tr>
     <tr id="pex_test.repos">
@@ -610,6 +601,19 @@ It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>
         <p>Set the path prefix to strip out from your sources.</p>
 <p>For example: If you have <code>services/foo/bar.py</code> and you want to call it with an <code>entrypoint</code> of <code>foo.bar</code>,
 you can set <code>strip_prefix</code> to <code>services</code>.</p>
+      </td>
+    </tr>
+    <tr id="pex_test.use_wheels">
+      <td><code>use_wheels</code></td>
+      <td>
+        <p><code>Boolean; Optional; Default is True</code></p>
+      </td>
+    </tr>
+    <tr id="pex_test.verbosity">
+      <td><code>verbosity</code></td>
+      <td>
+        <p><code>Integer; Optional; Default is 0</code></p>
+        <p>Set logging verbosity level.</p>
       </td>
     </tr>
     <tr id="pex_test.zip_safe">
