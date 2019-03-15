@@ -185,6 +185,8 @@ def _pex_binary_impl(ctx):
         arguments += ["--disable-cache"]
     for interpreter in ctx.attr.interpreters:
         arguments += ["--python", interpreter]
+    for platform in ctx.attr.platforms:
+        arguments += ["--platform", platform]
     for req_file in ctx.files.req_files:
         arguments += ["--requirement", req_file.path]
     for repo in repos:
@@ -332,6 +334,7 @@ pex_bin_attrs = _dmerge(pex_attrs, {
     "entrypoint": attr.string(),
     "script": attr.string(),
     "interpreters": attr.string_list(),
+    "platforms": attr.string_list(),
     "use_wheels": attr.bool(default = True),
     "verbosity": attr.int(default = 0),
     "zip_safe": attr.bool(
