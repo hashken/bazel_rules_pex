@@ -64,12 +64,6 @@ repo_file_types = FileType([
     ".tbz",
 ])
 
-# As much as I think this test file naming convention is a good thing, it's
-# probably a bad idea to impose it as a policy to all OSS users of these rules,
-# so I guess let's skip it.
-#
-# pex_test_file_types = FileType(["_unittest.py", "_test.py"])
-
 def _collect_transitive_sources(ctx):
     source_files = depset(order = "postorder")
     for dep in ctx.attr.deps:
@@ -232,10 +226,7 @@ def _pex_binary_impl(ctx):
             "requires-network": "1",
         },
         env = {
-            # TODO(benley): Write a repository rule to pick up certain
-            # PEX-related environment variables (like PEX_VERBOSE) from the
-            # system.
-            # Also, what if python is actually in /opt or something?
+            # TODO allow overriding PATH
             "PATH": "/bin:/usr/bin:/usr/local/bin",
             "PEX_VERBOSE": str(ctx.attr.verbosity),
         },
