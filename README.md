@@ -175,7 +175,7 @@ Rules to be invoked from WORKSPACE for remote dependencies.
 ## pex_binary
 
 <pre>
-pex_binary(<a href="#pex_binary.name">name</a>, <a href="#pex_binary.deps">deps</a>, <a href="#pex_binary.data">data</a>, <a href="#pex_binary.srcs">srcs</a>, <a href="#pex_binary.disable_cache">disable_cache</a>, <a href="#pex_binary.eggs">eggs</a>, <a href="#pex_binary.entrypoint">entrypoint</a>, <a href="#pex_binary.interpreters">interpreters</a>, <a href="#pex_binary.licenses">licenses</a>, <a href="#pex_binary.main">main</a>, <a href="#pex_binary.no_index">no_index</a>, <a href="#pex_binary.repos">repos</a>, <a href="#pex_binary.req_files">req_files</a>, <a href="#pex_binary.reqs">reqs</a>, <a href="#pex_binary.script">script</a>, <a href="#pex_binary.strip_prefix">strip_prefix</a>, <a href="#pex_binary.use_wheels">use_wheels</a>, <a href="#pex_binary.verbosity">verbosity</a>, <a href="#pex_binary.zip_safe">zip_safe</a>)
+pex_binary(<a href="#pex_binary.name">name</a>, <a href="#pex_binary.deps">deps</a>, <a href="#pex_binary.data">data</a>, <a href="#pex_binary.srcs">srcs</a>, <a href="#pex_binary.disable_cache">disable_cache</a>, <a href="#pex_binary.eggs">eggs</a>, <a href="#pex_binary.entrypoint">entrypoint</a>, <a href="#pex_binary.interpreters">interpreters</a>, <a href="#pex_binary.licenses">licenses</a>, <a href="#pex_binary.main">main</a>, <a href="#pex_binary.no_index">no_index</a>, <a href="#pex_binary.platforms">platforms</a>, <a href="#pex_binary.repos">repos</a>, <a href="#pex_binary.req_files">req_files</a>, <a href="#pex_binary.reqs">reqs</a>, <a href="#pex_binary.script">script</a>, <a href="#pex_binary.strip_prefix">strip_prefix</a>, <a href="#pex_binary.use_wheels">use_wheels</a>, <a href="#pex_binary.verbosity">verbosity</a>, <a href="#pex_binary.zip_safe">zip_safe</a>)
 </pre>
 
 Build a deployable pex executable.
@@ -274,6 +274,18 @@ It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>
       <td>
         <p><code>Boolean; Optional; Default is False</code></p>
         <p>If True, don't use pypi to resolve dependencies for <code>reqs</code> and <code>req_files</code>; Default: False</p>
+      </td>
+    </tr>
+    <tr id="pex_binary.platforms">
+      <td><code>platforms</code></td>
+      <td>
+        <p><code>List of strings; Optional; Default is []</code></p>
+        <p>The platforms for which to build the pex.</p>
+<p>To use wheels for specific interpreter/platform tags, you can append them to the platform with hyphens like:
+PLATFORM-IMPL-PYVER-ABI (e.g. "linux_x86_64-cp-27-cp27mu", "macosx_10.12_x86_64-cp-36-cp36m") PLATFORM is the
+host platform e.g. "linux-x86_64", "macosx-10.12-x86_64", etc". IMPL is the python implementation abbreviation
+(e.g. "cp", "pp", "jp"). PYVER is a two-digit string representing the python version (e.g. "27", "36"). ABI is
+the ABI tag (e.g. "cp36m", "cp27mu", "abi3", "none").</p>
       </td>
     </tr>
     <tr id="pex_binary.repos">
@@ -456,7 +468,7 @@ the transitive python dependencies and fetch them from pypi.</p>
 ## pex_test
 
 <pre>
-pex_test(<a href="#pex_test.name">name</a>, <a href="#pex_test.deps">deps</a>, <a href="#pex_test.data">data</a>, <a href="#pex_test.srcs">srcs</a>, <a href="#pex_test.disable_cache">disable_cache</a>, <a href="#pex_test.eggs">eggs</a>, <a href="#pex_test.entrypoint">entrypoint</a>, <a href="#pex_test.interpreters">interpreters</a>, <a href="#pex_test.licenses">licenses</a>, <a href="#pex_test.main">main</a>, <a href="#pex_test.no_index">no_index</a>, <a href="#pex_test.repos">repos</a>, <a href="#pex_test.req_files">req_files</a>, <a href="#pex_test.reqs">reqs</a>, <a href="#pex_test.script">script</a>, <a href="#pex_test.strip_prefix">strip_prefix</a>, <a href="#pex_test.use_wheels">use_wheels</a>, <a href="#pex_test.verbosity">verbosity</a>, <a href="#pex_test.zip_safe">zip_safe</a>)
+pex_test(<a href="#pex_test.name">name</a>, <a href="#pex_test.deps">deps</a>, <a href="#pex_test.data">data</a>, <a href="#pex_test.srcs">srcs</a>, <a href="#pex_test.disable_cache">disable_cache</a>, <a href="#pex_test.eggs">eggs</a>, <a href="#pex_test.entrypoint">entrypoint</a>, <a href="#pex_test.interpreters">interpreters</a>, <a href="#pex_test.licenses">licenses</a>, <a href="#pex_test.main">main</a>, <a href="#pex_test.no_index">no_index</a>, <a href="#pex_test.platforms">platforms</a>, <a href="#pex_test.repos">repos</a>, <a href="#pex_test.req_files">req_files</a>, <a href="#pex_test.reqs">reqs</a>, <a href="#pex_test.script">script</a>, <a href="#pex_test.strip_prefix">strip_prefix</a>, <a href="#pex_test.use_wheels">use_wheels</a>, <a href="#pex_test.verbosity">verbosity</a>, <a href="#pex_test.zip_safe">zip_safe</a>)
 </pre>
 
 
@@ -555,6 +567,18 @@ It is an error to specify <code>entrypoint</code>, <code>main</code>, and <code>
       <td>
         <p><code>Boolean; Optional; Default is False</code></p>
         <p>If True, don't use pypi to resolve dependencies for <code>reqs</code> and <code>req_files</code>; Default: False</p>
+      </td>
+    </tr>
+    <tr id="pex_test.platforms">
+      <td><code>platforms</code></td>
+      <td>
+        <p><code>List of strings; Optional; Default is []</code></p>
+        <p>The platforms for which to build the pex.</p>
+<p>To use wheels for specific interpreter/platform tags, you can append them to the platform with hyphens like:
+PLATFORM-IMPL-PYVER-ABI (e.g. "linux_x86_64-cp-27-cp27mu", "macosx_10.12_x86_64-cp-36-cp36m") PLATFORM is the
+host platform e.g. "linux-x86_64", "macosx-10.12-x86_64", etc". IMPL is the python implementation abbreviation
+(e.g. "cp", "pp", "jp"). PYVER is a two-digit string representing the python version (e.g. "27", "36"). ABI is
+the ABI tag (e.g. "cp36m", "cp27mu", "abi3", "none").</p>
       </td>
     </tr>
     <tr id="pex_test.repos">
