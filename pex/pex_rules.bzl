@@ -160,7 +160,7 @@ def _pex_binary_impl(ctx):
         transitive_files = transitive_files,
     )
 
-    resources_dir = ctx.actions.declare_directory("resources")
+    resources_dir = ctx.actions.declare_directory("resources/{}".format(ctx.attr.name))
     ctx.actions.run_shell(
         mnemonic = "CreateResourceDirectory",
         outputs = [resources_dir],
