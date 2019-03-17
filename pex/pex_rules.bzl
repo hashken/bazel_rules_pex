@@ -159,11 +159,11 @@ def _pex_binary_impl(ctx):
         mnemonic = "CreateResourceDirectory",
         outputs = [resources_dir],
         inputs = runfiles.files.to_list(),
-        command = "mkdir -p {resources_dir} && rsync -R {transitive_files} {resources_dir} \
-            && if [ \"{strip_prefix}\" != \"\" ] && [ -n \"$(ls -A {resources_dir}/{strip_prefix})\" ]; then cp -R {resources_dir}/{strip_prefix}/* {resources_dir}; fi \
-            && if [ \"{strip_prefix}\" != \"\" ]; then rm -rf {resources_dir}/{strip_prefix}; fi \
-            && if [ -d {resources_dir}/{genfiles_dir}/{strip_prefix} ] && [ -n \"$(ls -A {resources_dir}/{genfiles_dir}/{strip_prefix})\" ]; then cp -R {resources_dir}/{genfiles_dir}/{strip_prefix}/* {resources_dir}; fi \
-            && rm -rf {resources_dir}/{genfiles_dir}".format(
+        command = 'mkdir -p {resources_dir} && rsync -R {transitive_files} {resources_dir} \
+            && if [ "{strip_prefix}" != "" ] && [ -n "$(ls -A {resources_dir}/{strip_prefix})" ]; then cp -R {resources_dir}/{strip_prefix}/* {resources_dir}; fi \
+            && if [ "{strip_prefix}" != "" ]; then rm -rf {resources_dir}/{strip_prefix}; fi \
+            && if [ -d {resources_dir}/{genfiles_dir}/{strip_prefix} ] && [ -n "$(ls -A {resources_dir}/{genfiles_dir}/{strip_prefix})" ]; then cp -R {resources_dir}/{genfiles_dir}/{strip_prefix}/* {resources_dir}; fi \
+            && rm -rf {resources_dir}/{genfiles_dir}'.format(
             resources_dir = resources_dir.path,
             transitive_files = " ".join([file.path for file in runfiles.files]),
             genfiles_dir = ctx.configuration.genfiles_dir.path,
