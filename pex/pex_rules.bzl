@@ -155,6 +155,11 @@ def _pex_binary_impl(ctx):
     )
 
     resources_dir = ctx.actions.declare_directory("{}.resources".format(ctx.attr.name))
+
+    # Create resource directory and dump files into it
+    # Relocate files according to `strip_prefix` if necessary and get all files into the base resource directory
+    # Cleanup lingering files to prevent them from being added to the pex
+    # Add `__init__.py` files to make the modules findable by pex execution
     ctx.actions.run_shell(
         mnemonic = "CreateResourceDirectory",
         outputs = [resources_dir],
@@ -163,10 +168,12 @@ def _pex_binary_impl(ctx):
             && if [ "{strip_prefix}" != "" ] && [ -n "$(ls -A {resources_dir}/{strip_prefix})" ]; then cp -R {resources_dir}/{strip_prefix}/* {resources_dir}; fi \
             && if [ "{strip_prefix}" != "" ]; then rm -rf {resources_dir}/{strip_prefix}; fi \
             && if [ -d {resources_dir}/{genfiles_dir}/{strip_prefix} ] && [ -n "$(ls -A {resources_dir}/{genfiles_dir}/{strip_prefix})" ]; then cp -R {resources_dir}/{genfiles_dir}/{strip_prefix}/* {resources_dir}; fi \
-            && rm -rf {resources_dir}/{genfiles_dir}'.format(
+            && rm -rf {resources_dir}/{genfiles_parent_dir} \
+            && find {resources_dir} -type d -exec touch {{}}/__init__.py \;'.format(
             resources_dir = resources_dir.path,
             transitive_files = " ".join([file.path for file in runfiles.files]),
             genfiles_dir = ctx.configuration.genfiles_dir.path,
+            genfiles_parent_dir = ctx.configuration.genfiles_dir.path.split("/")[0],
             strip_prefix = ctx.attr.strip_prefix.strip("/"),
         ),
     )
