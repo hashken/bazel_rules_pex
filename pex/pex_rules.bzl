@@ -159,9 +159,15 @@ def _pex_binary_impl(ctx):
         mnemonic = "CreateResourceDirectory",
         outputs = [resources_dir],
         inputs = runfiles.files.to_list(),
-        command = "mkdir -p {resources_dir} && rsync -R {transitive_files} {resources_dir}".format(
+        command = "mkdir -p {resources_dir} && rsync -R {transitive_files} {resources_dir} \
+            && cp -R {resources_dir}/{strip_prefix}/* {resources_dir} \
+            && rm -r {resources_dir}/{strip_prefix} \
+            && cp -R {resources_dir}/{genfiles_dir}/{strip_prefix}/* {resources_dir} \
+            && rm -r {resources_dir}/{genfiles_dir}".format(
             resources_dir = resources_dir.path,
             transitive_files = " ".join([file.path for file in runfiles.files]),
+            genfiles_dir = ctx.configuration.genfiles_dir.path,
+            strip_prefix = ctx.attr.strip_prefix.strip("/"),
         ),
     )
 
@@ -195,14 +201,8 @@ def _pex_binary_impl(ctx):
         arguments += ["--script", script]
     arguments += [
         "--resources-directory",
-        "{resources_dir}/{strip_prefix}".format(
+        "{resources_dir}".format(
             resources_dir = resources_dir.path,
-            strip_prefix = ctx.attr.strip_prefix.strip("/"),
-        ),
-        "--resources-directory",
-        "{resources_dir}/{genfiles_dir}/{strip_prefix}".format(
-            resources_dir = resources_dir.path,
-            genfiles_dir = ctx.configuration.genfiles_dir.path,
             strip_prefix = ctx.attr.strip_prefix.strip("/"),
         ),
         "--pex-root",
