@@ -149,6 +149,9 @@ def _pex_binary_impl(ctx):
     for dep in ctx.attr.deps:
         transitive_files += dep.default_runfiles.files
 
+    for req_file in ctx.attr.req_files:
+        transitive_files += req_file.files
+
     runfiles = ctx.runfiles(
         collect_default = True,
         transitive_files = transitive_files,
