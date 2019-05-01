@@ -334,7 +334,7 @@ pex_bin_attrs = _dmerge(pex_attrs, {
     ),
     "entrypoint": attr.string(),
     "script": attr.string(),
-    "interpreters": attr.string_list(),
+    "interpreters": attr.string_list(default = ["python2.7", "python3.7"]),
     "platforms": attr.string_list(),
     "use_wheels": attr.bool(default = True),
     "verbosity": attr.int(default = 0),
@@ -536,6 +536,6 @@ def pex_repositories():
     native.http_file(
         name = "pex_bin",
         executable = True,
-        url = "https://github.com/pantsbuild/pex/releases/download/v1.6.2/pex27",
-        sha256 = "f6395a71b15e1cbeedfd417724413f7f7f2453ffa6a91db0dbd884ad8576a4ce",
+        url = "https://github.com/pantsbuild/pex/releases/download/v1.6.6/pex",
+        sha256 = "61bb79384db0da8c844678440bd368bcbfac17bbdb865721ad3f9cb0ab29b629",
     )
