@@ -334,7 +334,7 @@ pex_bin_attrs = _dmerge(pex_attrs, {
     ),
     "entrypoint": attr.string(),
     "script": attr.string(),
-    "interpreters": attr.string_list(default = ["python3.7"]),
+    "interpreters": attr.string_list(default = ["python2.7", "python3.7"]),
     "platforms": attr.string_list(),
     "use_wheels": attr.bool(default = True),
     "verbosity": attr.int(default = 0),
