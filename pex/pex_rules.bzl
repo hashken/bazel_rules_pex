@@ -45,13 +45,14 @@ In a BUILD file where you want to use these rules, or in your
 Lastly, make sure that `tools/build_rules/BUILD` exists, even if it is empty,
 so that Bazel can find your `prelude_bazel` file.
 """
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_file")
 
-pex_file_types = FileType([".py"])
-egg_file_types = FileType([".egg", ".whl"])
-req_file_types = FileType([".txt"])
+pex_file_types = [".py"]
+egg_file_types = [".egg", ".whl"]
+req_file_types = [".txt"]
 
 # Repos file types according to: https://www.python.org/dev/peps/pep-0527/
-repo_file_types = FileType([
+repo_file_types = [
     ".egg",
     ".whl",
     ".tar.gz",
@@ -62,38 +63,41 @@ repo_file_types = FileType([
     ".tar.Z",
     ".tgz",
     ".tbz",
-])
+]
 
 def _collect_transitive_sources(ctx):
-    source_files = depset(order = "postorder")
+    source_files = list()
+    transitive_srcs = list()
     for dep in ctx.attr.deps:
         if hasattr(dep, "py"):
-            source_files += dep.py.transitive_sources
-    source_files += pex_file_types.filter(ctx.files.srcs)
-    return source_files
+            transitive_srcs.append(dep.py.transitive_sources)
+    source_files += [src for src in ctx.files.srcs if src.extension in pex_file_types]
+    return depset(source_files, transitive=transitive_srcs, order="postorder")
 
 def _collect_transitive_eggs(ctx):
-    transitive_eggs = depset(order = "postorder")
+    eggs = list()
+    transitive_eggs = list()
     for dep in ctx.attr.deps:
         if hasattr(dep, "py") and hasattr(dep.py, "transitive_eggs"):
-            transitive_eggs += dep.py.transitive_eggs
-    transitive_eggs += egg_file_types.filter(ctx.files.eggs)
-    return transitive_eggs
+            transitive_eggs.append(dep.py.transitive_eggs)
+    eggs += [egg for egg in ctx.files.eggs if egg.extension in egg_file_types]
+    return depset(eggs, transitive=transitive_eggs, order = "postorder")
 
 def _collect_transitive_reqs(ctx):
-    transitive_reqs = depset(order = "postorder")
+    reqs = list()
+    transitive_reqs = list()
     for dep in ctx.attr.deps:
         if hasattr(dep, "py") and hasattr(dep.py, "transitive_reqs"):
-            transitive_reqs += dep.py.transitive_reqs
-    transitive_reqs += ctx.attr.reqs
-    return transitive_reqs
+            transitive_reqs.append(dep.py.transitive_reqs)
+    reqs += ctx.attr.reqs
+    return depset(reqs, transitive=transitive_reqs, order = "postorder")
 
 def _collect_repos(ctx):
     repos = {}
     for dep in ctx.attr.deps:
         if hasattr(dep, "py") and hasattr(dep.py, "repos"):
             repos += dep.py.repos
-    for file in repo_file_types.filter(ctx.files.repos):
+    for file in [file for file in ctx.files.repos if file.extension in repo_file_types]:
         repos.update({file.dirname: True})
     return repos.keys()
 
@@ -121,7 +125,7 @@ def _pex_library_impl(ctx):
     )
 
 def _pex_binary_impl(ctx):
-    transitive_files = depset(ctx.files.srcs)
+    transitive_files = list()
 
     if ctx.attr.entrypoint and ctx.file.main:
         fail("Please specify either entrypoint or main, not both.")
@@ -147,14 +151,15 @@ def _pex_binary_impl(ctx):
     repos = _collect_repos(ctx)
 
     for dep in ctx.attr.deps:
-        transitive_files += dep.default_runfiles.files
+        transitive_files.append(dep.default_runfiles.files)
 
     for req_file in ctx.attr.req_files:
-        transitive_files += req_file.files
+        transitive_files.append(req_file.files)
 
     runfiles = ctx.runfiles(
-        collect_default = True,
-        transitive_files = transitive_files,
+        #collect_default = True,
+        files = ctx.files.srcs,
+        transitive_files = depset(transitive=transitive_files),
     )
 
     resources_dir = ctx.actions.declare_directory("{}.resources".format(ctx.attr.name))
@@ -174,7 +179,7 @@ def _pex_binary_impl(ctx):
             && rm -rf {resources_dir}/{genfiles_parent_dir} \
             && find {resources_dir} -type d -exec touch {{}}/__init__.py \;'.format(
             resources_dir = resources_dir.path,
-            transitive_files = " ".join([file.path for file in runfiles.files]),
+            transitive_files = " ".join([file.path for file in runfiles.files.to_list()]),
             genfiles_dir = ctx.configuration.genfiles_dir.path,
             genfiles_parent_dir = ctx.configuration.genfiles_dir.path.split("/")[0],
             strip_prefix = ctx.attr.strip_prefix.strip("/"),
@@ -201,9 +206,9 @@ def _pex_binary_impl(ctx):
         arguments += ["--requirement", req_file.path]
     for repo in repos:
         arguments += ["--repo", repo]
-    for egg in py.transitive_eggs:
+    for egg in py.transitive_eggs.to_list():
         arguments += [egg.path]
-    for req in py.transitive_reqs:
+    for req in py.transitive_reqs.to_list():
         arguments += [req]
     if main_pkg:
         arguments += ["--entry-point", main_pkg]
@@ -223,8 +228,8 @@ def _pex_binary_impl(ctx):
 
     # form the inputs to pex builder
     _inputs = (
-        list(runfiles.files) +
-        list(py.transitive_eggs)
+        runfiles.files.to_list() +
+        py.transitive_eggs.to_list()
     ) + [resources_dir]
 
     ctx.actions.run(
@@ -305,12 +310,7 @@ pex_attrs = {
     ),
     "data": attr.label_list(
         allow_files = True,
-        cfg = "data",
     ),
-
-    # required for pex_library targets in third_party subdirs
-    # but theoretically a common attribute for all rules
-    "licenses": attr.license(),
 
     # Used by pex_binary and pex_*test, not pex_library:
     "_pexbuilder": attr.label(
@@ -329,8 +329,7 @@ def _dmerge(a, b):
 
 pex_bin_attrs = _dmerge(pex_attrs, {
     "main": attr.label(
-        allow_files = True,
-        single_file = True,
+        allow_single_file = True,
     ),
     "entrypoint": attr.string(),
     "script": attr.string(),
@@ -443,11 +442,10 @@ _pytest_pex_test = rule(
         "runner": attr.label(
             executable = True,
             mandatory = True,
-            cfg = "data",
+            cfg = "host",
         ),
         "launcher_template": attr.label(
-            allow_files = True,
-            single_file = True,
+            allow_single_file = True,
             default = Label("//pex:testlauncher.sh.template"),
         ),
     }),
@@ -461,7 +459,6 @@ def pex_pytest(
         data = [],
         args = [],
         flaky = False,
-        licenses = [],
         local = None,
         size = None,
         timeout = None,
@@ -501,7 +498,6 @@ def pex_pytest(
             "@py_whl//file",
         ],
         entrypoint = "pytest",
-        licenses = licenses,
         testonly = True,
         **kwargs
     )
@@ -511,7 +507,6 @@ def pex_pytest(
         args = args,
         data = data,
         flaky = flaky,
-        licenses = licenses,
         local = local,
         size = size,
         srcs = srcs,
@@ -521,21 +516,21 @@ def pex_pytest(
 
 def pex_repositories():
     """Rules to be invoked from WORKSPACE for remote dependencies."""
-    native.http_file(
+    http_file(
         name = "pytest_whl",
-        url = "https://pypi.python.org/packages/8c/7d/f5d71f0e28af32388e07bd4ce0dbd2b3539693aadcae4403266173ec87fa/pytest-3.2.3-py2.py3-none-any.whl",
+        urls = ["https://pypi.python.org/packages/8c/7d/f5d71f0e28af32388e07bd4ce0dbd2b3539693aadcae4403266173ec87fa/pytest-3.2.3-py2.py3-none-any.whl"],
         sha256 = "81a25f36a97da3313e1125fce9e7bbbba565bc7fec3c5beb14c262ddab238ac1",
     )
 
-    native.http_file(
+    http_file(
         name = "py_whl",
-        url = "https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl",
+        urls = ["https://pypi.python.org/packages/53/67/9620edf7803ab867b175e4fd23c7b8bd8eba11cb761514dcd2e726ef07da/py-1.4.34-py2.py3-none-any.whl"],
         sha256 = "2ccb79b01769d99115aa600d7eed99f524bf752bba8f041dc1c184853514655a",
     )
 
-    native.http_file(
+    http_file(
         name = "pex_bin",
         executable = True,
-        url = "https://github.com/pantsbuild/pex/releases/download/v2.1.7/pex",
+        urls = ["https://github.com/pantsbuild/pex/releases/download/v2.1.7/pex"],
         sha256 = "375ab4a405a6db57f3afd8d60eca666e61931b44f156dc78ac7d8e47bddc96d6",
     )
