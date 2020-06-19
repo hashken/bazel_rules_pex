@@ -71,7 +71,7 @@ def _collect_transitive_sources(ctx):
     for dep in ctx.attr.deps:
         if hasattr(dep, "py"):
             transitive_srcs.append(dep.py.transitive_sources)
-    source_files += [src for src in ctx.files.srcs if src.extension in pex_file_types]
+    source_files += [src for src in ctx.files.srcs]
     return depset(source_files, transitive=transitive_srcs, order="postorder")
 
 def _collect_transitive_eggs(ctx):
@@ -80,7 +80,7 @@ def _collect_transitive_eggs(ctx):
     for dep in ctx.attr.deps:
         if hasattr(dep, "py") and hasattr(dep.py, "transitive_eggs"):
             transitive_eggs.append(dep.py.transitive_eggs)
-    eggs += [egg for egg in ctx.files.eggs if egg.extension in egg_file_types]
+    eggs += [egg for egg in ctx.files.eggs]
     return depset(eggs, transitive=transitive_eggs, order = "postorder")
 
 def _collect_transitive_reqs(ctx):
@@ -97,7 +97,7 @@ def _collect_repos(ctx):
     for dep in ctx.attr.deps:
         if hasattr(dep, "py") and hasattr(dep.py, "repos"):
             repos += dep.py.repos
-    for file in [file for file in ctx.files.repos if file.extension in repo_file_types]:
+    for file in [file for file in ctx.files.repos]:
         repos.update({file.dirname: True})
     return repos.keys()
 
@@ -112,9 +112,9 @@ def _collect_transitive(ctx):
     )
 
 def _pex_library_impl(ctx):
-    transitive_files = depset(ctx.files.srcs)
+    transitive_files = ctx.files.srcs
     for dep in ctx.attr.deps:
-        transitive_files += dep.default_runfiles.files
+        transitive_files = transitive_files + dep.default_runfiles.files.to_list()
     return struct(
         files = depset(),
         py = _collect_transitive(ctx),
