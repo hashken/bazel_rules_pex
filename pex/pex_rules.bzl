@@ -157,7 +157,7 @@ def _pex_binary_impl(ctx):
         transitive_files.append(req_file.files)
 
     runfiles = ctx.runfiles(
-        #collect_default = True,
+        collect_default = True,
         files = ctx.files.srcs,
         transitive_files = depset(transitive=transitive_files),
     )
