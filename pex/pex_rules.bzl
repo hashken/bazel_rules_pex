@@ -531,6 +531,6 @@ def pex_repositories():
     http_file(
         name = "pex_bin",
         executable = True,
-        urls = ["https://github.com/pantsbuild/pex/releases/download/v2.1.7/pex"],
-        sha256 = "375ab4a405a6db57f3afd8d60eca666e61931b44f156dc78ac7d8e47bddc96d6",
+        urls = ["https://github.com/pantsbuild/pex/releases/download/v2.1.16/pex"],
+        sha256 = "38712847654254088a23394728f9a5fb93c6c83631300e7ab427ec780a88f653",
     )
