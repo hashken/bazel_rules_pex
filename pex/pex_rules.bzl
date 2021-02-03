@@ -162,7 +162,7 @@ def _pex_binary_impl(ctx):
         transitive_files = depset(transitive=transitive_files),
     )
 
-    resources_dir = ctx.actions.declare_directory("{}.resources".format(ctx.attr.name))
+    sources_dir = ctx.actions.declare_directory("{}.sources".format(ctx.attr.name))
 
     # Create resource directory and dump files into it
     # Relocate files according to `strip_prefix` if necessary and get all files into the base resource directory
@@ -170,15 +170,15 @@ def _pex_binary_impl(ctx):
     # Add `__init__.py` files to make the modules findable by pex execution
     ctx.actions.run_shell(
         mnemonic = "CreateResourceDirectory",
-        outputs = [resources_dir],
+        outputs = [sources_dir],
         inputs = runfiles.files.to_list(),
-        command = 'mkdir -p {resources_dir} && rsync -R {transitive_files} {resources_dir} \
-            && if [ "{strip_prefix}" != "" ] && [ -n "$(ls -A {resources_dir}/{strip_prefix})" ]; then cp -R {resources_dir}/{strip_prefix}/* {resources_dir}; fi \
-            && if [ "{strip_prefix}" != "" ]; then rm -rf {resources_dir}/{strip_prefix}; fi \
-            && if [ -d {resources_dir}/{genfiles_dir}/{strip_prefix} ] && [ -n "$(ls -A {resources_dir}/{genfiles_dir}/{strip_prefix})" ]; then cp -R {resources_dir}/{genfiles_dir}/{strip_prefix}/* {resources_dir}; fi \
-            && rm -rf {resources_dir}/{genfiles_parent_dir} \
-            && find {resources_dir} -type d -exec touch {{}}/__init__.py \;'.format(
-            resources_dir = resources_dir.path,
+        command = 'mkdir -p {sources_dir} && rsync -R {transitive_files} {sources_dir} \
+            && if [ "{strip_prefix}" != "" ] && [ -n "$(ls -A {sources_dir}/{strip_prefix})" ]; then cp -R {sources_dir}/{strip_prefix}/* {sources_dir}; fi \
+            && if [ "{strip_prefix}" != "" ]; then rm -rf {sources_dir}/{strip_prefix}; fi \
+            && if [ -d {sources_dir}/{genfiles_dir}/{strip_prefix} ] && [ -n "$(ls -A {sources_dir}/{genfiles_dir}/{strip_prefix})" ]; then cp -R {sources_dir}/{genfiles_dir}/{strip_prefix}/* {sources_dir}; fi \
+            && rm -rf {sources_dir}/{genfiles_parent_dir} \
+            && find {sources_dir} -type d -exec touch {{}}/__init__.py \;'.format(
+            sources_dir = sources_dir.path,
             transitive_files = " ".join([file.path for file in runfiles.files.to_list()]),
             genfiles_dir = ctx.configuration.genfiles_dir.path,
             genfiles_parent_dir = ctx.configuration.genfiles_dir.path.split("/")[0],
@@ -216,9 +216,9 @@ def _pex_binary_impl(ctx):
         arguments += ["--script", script]
     arguments += [
         # TODO set `--tmpdir` option within the build work dir so we stop putting temp files under `/tmp` and filling up root
-        "--resources-directory",
-        "{resources_dir}".format(
-            resources_dir = resources_dir.path,
+        "--sources-directory",
+        "{sources_dir}".format(
+            sources_dir = sources_dir.path,
             strip_prefix = ctx.attr.strip_prefix.strip("/"),
         ),
         "--pex-root",
@@ -231,7 +231,7 @@ def _pex_binary_impl(ctx):
     _inputs = (
         runfiles.files.to_list() +
         py.transitive_eggs.to_list()
-    ) + [resources_dir]
+    ) + [sources_dir]
 
     ctx.actions.run(
         mnemonic = "PexPython",
