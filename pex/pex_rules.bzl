@@ -215,6 +215,7 @@ def _pex_binary_impl(ctx):
     elif script:
         arguments += ["--script", script]
     arguments += [
+        # TODO set `--tmpdir` option within the build work dir so we stop putting temp files under `/tmp` and filling up root
         "--resources-directory",
         "{resources_dir}".format(
             resources_dir = resources_dir.path,
