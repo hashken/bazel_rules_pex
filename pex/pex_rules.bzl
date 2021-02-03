@@ -303,6 +303,7 @@ pex_attrs = {
         flags = ["DIRECT_COMPILE_TIME_INPUT"],
         allow_files = req_file_types,
     ),
+    # TODO support `--pex-repository` option to leverage shared requirements pex files to minimize redo-ing requirements resolutions (https://github.com/pantsbuild/pex/pull/1182)
     "no_index": attr.bool(default = False),
     "disable_cache": attr.bool(default = False),
     "repos": attr.label_list(
