@@ -186,6 +186,8 @@ def _pex_binary_impl(ctx):
         ),
     )
 
+    print(ctx)
+
     pexbuilder = ctx.executable._pexbuilder
     arguments = ["setuptools==44.1.0"]
 
