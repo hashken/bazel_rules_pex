@@ -205,6 +205,8 @@ def _pex_binary_impl(ctx):
 
   pexbuilder = ctx.executable._pexbuilder
 
+  print(ctx)
+
   # form the arguments to pex builder
   arguments =  [] if ctx.attr.zip_safe else ["--not-zip-safe"]
   arguments += [] if ctx.attr.pex_use_wheels else ["--no-use-wheel"]
