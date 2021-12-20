@@ -188,6 +188,9 @@ def _pex_binary_impl(ctx):
 
     print("Context")
     print(ctx)
+    print("req_files", ctx.files.req_files)
+    print("transitive_eggs", py.transitive_eggs.to_list())
+    print("transitive_reqs", py.transitive_reqs.to_list())
 
     pexbuilder = ctx.executable._pexbuilder
     arguments = ["setuptools==44.1.0"]
