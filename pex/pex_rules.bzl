@@ -244,6 +244,7 @@ def _pex_binary_impl(ctx):
             # TODO allow overriding PATH
             "PATH": "/bin:/usr/bin:/usr/local/bin",
             "PEX_VERBOSE": str(ctx.attr.verbosity),
+            "SETUPTOOLS_USE_DISTUTILS": "stdlib",
         },
         arguments = arguments,
     )
