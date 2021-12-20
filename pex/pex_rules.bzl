@@ -186,6 +186,7 @@ def _pex_binary_impl(ctx):
         ),
     )
 
+    print("Context")
     print(ctx)
 
     pexbuilder = ctx.executable._pexbuilder
